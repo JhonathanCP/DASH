@@ -18,10 +18,15 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/sgdredes':
         from sgdredes import layout as sgdredes_layout, register_callbacks as register_callbacks_sgdredes
-        register_callbacks_sgdredes(app)
+        if not hasattr(app, 'sgdredes_callbacks_registered'):
+            register_callbacks_sgdredes(app)
+            app.sgdredes_callbacks_registered = True
         return sgdredes_layout
     elif pathname == '/reporte2':
-        from reporte2 import layout as reporte2_layout
+        from reporte2 import layout as reporte2_layout, register_callbacks as register_callbacks_reporte2
+        if not hasattr(app, 'reporte2_callbacks_registered'):
+            register_callbacks_reporte2(app)
+            app.reporte2_callbacks_registered = True
         return reporte2_layout
     else:
         return html.Div([
@@ -31,4 +36,4 @@ def display_page(pathname):
 
 # Servidor
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=False, host='0.0.0.0', port=8050)

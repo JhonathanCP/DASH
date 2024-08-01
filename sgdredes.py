@@ -154,60 +154,63 @@ layout = dbc.Container([
 ], fluid=True)
 
 def register_callbacks(app):
-    @app.callback(
-        [Output('table-container', 'children'),
-         Output('razon-social', 'children'),
-         Output('min-fecha', 'children'),
-         Output('tipdoc', 'children'),
-         Output('asunto', 'children')],
-        [Input('filter-expediente', 'value')]
-    )
-    def update_table_and_card(search_value):
-        if not search_value:
-            return html.Div(), "", "", "", "Ingrese el N° de expediente"
-
-        filtered_data = TablaFin[TablaFin['N° Expediente'].str.contains(search_value, case=False, na=False)]
-        filtered_data_sorted = filtered_data.sort_values(by='Fecha de envío', ascending=True)
-        last_5_data = filtered_data_sorted.tail(5)
-
-        if last_5_data.empty:
-            return html.Div(), "", "", "", "Ingrese el N° de expediente"
-
-        min_fecha = filtered_data_sorted['Fecha de envío'].min()
-        razon_social_min_fecha = filtered_data_sorted[filtered_data_sorted['Fecha de envío'] == min_fecha]['Razón Social'].values[0]
-        tipdoc_min_fecha = filtered_data_sorted[filtered_data_sorted['Fecha de envío'] == min_fecha]['Clase de documento'].values[0]
-        asunto_min_fecha = filtered_data_sorted[filtered_data_sorted['Fecha de envío'] == min_fecha]['Asunto'].values[0]
-
-        table = dash_table.DataTable(
-            id='table',
-            columns=[{"name": i, "id": i} for i in ['N° Expediente', 'Clase de documento', 'Asunto', 'Fecha de envío', 'Origen', 'Fecha de aceptación', 'Destino', 'Red']],
-            data=last_5_data.to_dict('records'),
-            style_table={
-                'overflowX': 'auto',
-                'border': 'thin lightgrey solid',
-                'fontFamily': 'Calibri',
-                'fontSize': '12px',
-                'width': '100%',
-                'height': '100%'
-            },
-            style_cell={
-                'fontFamily': 'Calibri',
-                'height': 'auto',
-                'minWidth': '80px',
-                'width': '80px',
-                'maxWidth': '120px',
-                'whiteSpace': 'normal',
-                'color': '#606060',
-                'fontSize': '14px',
-                'textAlign': 'left'
-            },
-            style_header={
-                'backgroundColor': '#0064AF',
-                'color': 'white',
-                'fontWeight': 'bold',
-                'textAlign': 'center'
-            },
-            fixed_rows={'headers': True},
+    if not hasattr(app, 'callbacks_registered'):
+        @app.callback(
+            [Output('table-container', 'children'),
+             Output('razon-social', 'children'),
+             Output('min-fecha', 'children'),
+             Output('tipdoc', 'children'),
+             Output('asunto', 'children')],
+            [Input('filter-expediente', 'value')]
         )
+        def update_table_and_card(search_value):
+            if not search_value:
+                return html.Div(), "", "", "", "Ingrese el N° de expediente"
 
-        return table, f"Razón Social: {razon_social_min_fecha}", f"Fecha de Envío: {min_fecha.strftime('%Y-%m-%d')}", f"Tipo de documento: {tipdoc_min_fecha}", asunto_min_fecha
+            filtered_data = TablaFin[TablaFin['N° Expediente'].str.contains(search_value, case=False, na=False)]
+            filtered_data_sorted = filtered_data.sort_values(by='Fecha de envío', ascending=True)
+            last_5_data = filtered_data_sorted.tail(5)
+
+            if last_5_data.empty:
+                return html.Div(), "", "", "", "Ingrese el N° de expediente"
+
+            min_fecha = filtered_data_sorted['Fecha de envío'].min()
+            razon_social_min_fecha = filtered_data_sorted[filtered_data_sorted['Fecha de envío'] == min_fecha]['Razón Social'].values[0]
+            tipdoc_min_fecha = filtered_data_sorted[filtered_data_sorted['Fecha de envío'] == min_fecha]['Clase de documento'].values[0]
+            asunto_min_fecha = filtered_data_sorted[filtered_data_sorted['Fecha de envío'] == min_fecha]['Asunto'].values[0]
+
+            table = dash_table.DataTable(
+                id='table',
+                columns=[{"name": i, "id": i} for i in ['N° Expediente', 'Clase de documento', 'Asunto', 'Fecha de envío', 'Origen', 'Fecha de aceptación', 'Destino', 'Red']],
+                data=last_5_data.to_dict('records'),
+                style_table={
+                    'overflowX': 'auto',
+                    'border': 'thin lightgrey solid',
+                    'fontFamily': 'Calibri',
+                    'fontSize': '12px',
+                    'width': '100%',
+                    'height': '100%'
+                },
+                style_cell={
+                    'fontFamily': 'Calibri',
+                    'height': 'auto',
+                    'minWidth': '80px',
+                    'width': '80px',
+                    'maxWidth': '120px',
+                    'whiteSpace': 'normal',
+                    'color': '#606060',
+                    'fontSize': '14px',
+                    'textAlign': 'left'
+                },
+                style_header={
+                    'backgroundColor': '#0064AF',
+                    'color': 'white',
+                    'fontWeight': 'bold',
+                    'textAlign': 'center'
+                },
+                fixed_rows={'headers': True},
+            )
+
+            return table, f"Razón Social: {razon_social_min_fecha}", f"Fecha de Envío: {min_fecha.strftime('%Y-%m-%d')}", f"Tipo de documento: {tipdoc_min_fecha}", asunto_min_fecha
+        
+        app.callbacks_registered = True
