@@ -1,10 +1,14 @@
 import dash
 from dash import html, dcc
 from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
 
 # Inicializar la aplicación Dash
 app = dash.Dash(__name__)
 app.title = "Proyecto Dash"
+
+external_stylesheets = [dbc.themes.BOOTSTRAP]
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # Establecer el layout principal de la aplicación
 app.layout = html.Div([

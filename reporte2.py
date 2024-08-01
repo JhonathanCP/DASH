@@ -124,11 +124,8 @@ merged_df2 = merged_df2.rename(columns={
 })
 
 layout = dbc.Container([
-    html.Div(),
-
-    # Agregar un espacio ajustable antes del título principal
     html.Div(style={'height': '12px'}),
-
+   
     html.H1("Reporte de defunciones validadas de Dengue", style={'color': '#0064AF', 'fontSize': '28px'}),
     html.H2(f"Fuente: ESSI. Actualizado al {fecha_simple}. Actualización diaria. Validado por la Oficina de Inteligencia e Información Sanitaria - GCPS. V.1.0.0", style={'color': '#0064AF', 'fontSize': '12px'}),
     html.Hr(style={'border': '1px solid #0064AF'}),
@@ -149,7 +146,7 @@ layout = dbc.Container([
                 "GCTIC - GSIT",
                 style={
                     'position': 'absolute',
-                    'top': '35px',
+                    'top': '35px',  # Ajusta este valor para que se posicione justo debajo del primer texto
                     'right': '20px',
                     'color': '#0064AF',
                     'fontSize': '14px',
@@ -247,7 +244,7 @@ layout = dbc.Container([
                     dash_table.DataTable(
                         id='table',
                         columns=[{"name": i, "id": i} for i in [
-                            'ID', 'Área', 'CIE10', 'Principal motivo de consulta', 'Otros motivos de consulta', 'Fecha de defunción', 'IPRESS', 'Red', 'Estado'
+                            'ID', 'Área', 'CIE10', 'Principal motivo de consulta','Otros motivos de consulta', 'Fecha de defunción', 'IPRESS', 'Red', 'Estado'
                         ]],
                         style_table={
                             'overflowX': 'auto',
@@ -274,18 +271,45 @@ layout = dbc.Container([
                             'textAlign': 'center'
                         },
                         style_data_conditional=[
-                            {'if': {'column_id': 'ID'}, 'textAlign': 'left'},
-                            {'if': {'column_id': 'Área'}, 'textAlign': 'left'},
-                            {'if': {'column_id': 'CIE10'}, 'textAlign': 'left'},
-                            {'if': {'column_id': 'Principal motivo de consulta'}, 'textAlign': 'left'},
-                            {'if': {'column_id': 'Otros motivos de consulta'}, 'textAlign': 'left'},
-                            {'if': {'column_id': 'Fecha de defunción'}, 'textAlign': 'left'},
-                            {'if': {'column_id': 'IPRESS'}, 'textAlign': 'left'},
-                            {'if': {'column_id': 'Red'}, 'textAlign': 'left'},
-                            {'if': {'column_id': 'Estado'}, 'textAlign': 'center'}
-                        ],
-                        fixed_rows={'headers': True},
-                        sort_action='native',  # Habilitar clasificación
+
+                        {
+                            'if': {'column_id': 'ID'},
+                            'textAlign': 'left'
+                        },
+                        {
+                            'if': {'column_id': 'Área'},
+                            'textAlign': 'left'
+                        },
+                        {
+                            'if': {'column_id': 'CIE10'},
+                            'textAlign': 'left'
+                        },
+                          {
+                            'if': {'column_id': 'Principal motivo de consulta'},
+                            'textAlign': 'left'
+                        },
+                        {
+                            'if': {'column_id': 'Otros motivos de consulta'},
+                            'textAlign': 'left'
+                        },
+                          {
+                            'if': {'column_id': 'Fecha de defunción'},
+                            'textAlign': 'left'
+                        },
+                        {
+                            'if': {'column_id': 'IPRESS'},
+                            'textAlign': 'left'
+                        },
+                        {
+                            'if': {'column_id': 'Red'},
+                            'textAlign': 'left'
+                        },
+                        {
+                            'if': {'column_id': 'Estado'},
+                            'textAlign': 'center'
+                        }
+                    ],fixed_rows={'headers': True},
+                    sort_action='native',  # Habilitar clasificación
                     )
                 ], style={'padding-bottom': '0px', 'margin-bottom': '0px'})
             ], style={'padding-bottom': '0px', 'margin-bottom': '0px'})
