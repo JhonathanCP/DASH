@@ -33,8 +33,12 @@ def create_csv_export_route(server):
             servicios_ipress_total.drop(columns=['nivel'], inplace=True, errors='ignore')
             servicios_ipress_total.drop(columns=['codservicio'], inplace=True, errors='ignore')
             servicios_ipress_total.drop(columns=['origen'], inplace=True, errors='ignore')
-            servicios_ipress_total.rename(columns={"centro": "ipress"})
-            servicios_ipress_total['fecha_corte'] = datetime.now()
+            # Renombrar la columna 'centro' a 'ipress'
+            servicios_ipress_total.rename(columns={"centro": "ipress"}, inplace=True)
+
+            # Agregar la columna 'fecha_corte' con el formato adecuado (YYYY-MM-DD HH:MM:SS)
+            servicios_ipress_total['fecha_corte'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            servicios_ipress_total.columns = servicios_ipress_total.columns.str.upper()           
 
             # Convertir el DataFrame a un archivo CSV en memoria
             str_io = io.StringIO()
