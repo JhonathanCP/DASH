@@ -2,6 +2,7 @@ from flask import Flask, send_file
 import pandas as pd
 import io
 from sqlalchemy import create_engine
+from datetime import datetime
 
 
 def create_csv_export_route(server):
@@ -32,6 +33,8 @@ def create_csv_export_route(server):
             servicios_ipress_total.drop(columns=['nivel'], inplace=True, errors='ignore')
             servicios_ipress_total.drop(columns=['codservicio'], inplace=True, errors='ignore')
             servicios_ipress_total.drop(columns=['origen'], inplace=True, errors='ignore')
+            servicios_ipress_total.rename(columns={"centro": "ipress"})
+            servicios_ipress_total['fecha_corte'] = datetime.now()
 
             # Convertir el DataFrame a un archivo CSV en memoria
             str_io = io.StringIO()
@@ -43,7 +46,7 @@ def create_csv_export_route(server):
                 io.BytesIO(str_io.getvalue().encode()),
                 mimetype='text/csv',
                 as_attachment=True,
-                download_name='reporte.csv'
+                download_name='Avance_mi_consulta.csv'
             )
         finally:
             # Liberar memoria y cerrar la conexión a la base de datos
