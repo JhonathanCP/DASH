@@ -239,7 +239,7 @@ layout = dbc.Container([
                 dbc.Col([
                     html.Div(
                         children=[
-                            html.Button("Descargar Datos", id="btn_csv", n_clicks=0, className="btn", style={
+                            html.Button("Descargar datos", id="btn_csv", n_clicks=0, className="btn", style={
                                 'color': '#FFFFFF', 'background-color': '#0F71F2',
                                 'border': 'none', 'padding': '10px 20px',
                                 'text-align': 'center', 'font-size': '16px',
