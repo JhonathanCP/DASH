@@ -202,7 +202,7 @@ layout = dbc.Container([
                         style={'font-size': '12px', 'height': '40px'},
                         maxHeight=150
                     ),
-                ], width=2),
+                ], width=1),
 
                 dbc.Col([
                     html.Label("ID", style={'font-size': '16px', 'color': '#0064AF'}),
@@ -234,6 +234,21 @@ layout = dbc.Container([
                         ]),
                         style={'background-color': '#F4FAFD', 'border-color': '#35A2C1','height':'70px'}
                     ),
+                ], width=1),
+
+                dbc.Col([
+                    html.Div(
+                        children=[
+                            html.Button("Descargar Datos", id="btn_csv", n_clicks=0, className="btn", style={
+                                'color': '#FFFFFF', 'background-color': '#0F71F2',
+                                'border': 'none', 'padding': '10px 20px',
+                                'text-align': 'center', 'font-size': '16px',
+                                'border-radius': '5px'
+                            }),
+                            dcc.Download(id="download-dataframe-csv"),
+                        ],
+                        style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center', 'height': '100%'}
+                    )
                 ], width=1),
             ]),
 
@@ -320,12 +335,14 @@ layout = dbc.Container([
         ]),
         style={'border': '1px solid #95D3E9', 'padding': '0px', 'border-radius': '5px','height':'800px','margin-bottom':'45px'}
     ),
+    
     dcc.Interval(
         id='interval-component',
         interval=5*60*1000,  # 5 minutos en milisegundos
         n_intervals=0
     )
 ], fluid=True)
+
 
 def register_callbacks(app):
     @app.callback(
@@ -389,3 +406,19 @@ def register_callbacks(app):
 
         total_cit_num = filtered_df2['dengue'].sum()
         return f"{total_cit_num}"
+    
+    @app.callback(
+        Output("download-dataframe-csv", "data"),
+        Input("btn_csv", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def download_as_csv(n_clicks):
+        columns_to_include = [
+            'ID', 'Área', 'CIE10', 'Principal motivo de consulta', 
+            'Otros motivos de consulta', 'Fecha de defunción', 
+            'IPRESS', 'Red', 'Estado'
+        ]
+        
+        filtered_df2 = merged_df2[columns_to_include]
+        
+        return dcc.send_data_frame(filtered_df2.to_csv, "defunciones_dengue.csv", sep=';', index=False)
