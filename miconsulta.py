@@ -21,7 +21,7 @@ def create_csv_export_route(server):
             # Comparar los DataFrames y añadir la columna 'habilitado_mi_consulta'
             columnas_comunes = list(servicios_ipress_total.columns)
             servicios_ipress_total['habilitado_mi_consulta'] = servicios_ipress_total.apply(
-                lambda row: 'Sí' if (servicios_ipress_miconsulta[columnas_comunes] == row[columnas_comunes]).all(1).any() else 'No',
+                lambda row: 'Si' if (servicios_ipress_miconsulta[columnas_comunes] == row[columnas_comunes]).all(1).any() else 'No',
                 axis=1
             )
 
