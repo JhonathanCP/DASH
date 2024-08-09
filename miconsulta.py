@@ -30,7 +30,7 @@ def create_csv_export_route(server):
 
             # Convertir el DataFrame a un archivo CSV en memoria
             str_io = io.StringIO()
-            servicios_ipress_total.to_csv(str_io, sep=';', index=False)
+            servicios_ipress_total.to_csv(str_io, sep=';', index=False, encoding='utf-8')
             str_io.seek(0)
 
             # Enviar el archivo CSV al cliente
