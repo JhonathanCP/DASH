@@ -95,7 +95,7 @@ merged_df2 = pd.merge(merged_df, dim_cie10_s, on='id_cie_s', how='left')
 
 merged_df2['validado'] = pd.to_numeric(merged_df2['validado'], errors='coerce').fillna(0).astype(int)
 merged_df2['dengue'] = pd.to_numeric(merged_df2['dengue'], errors='coerce').fillna(0).astype(int)
-merged_df2['validado2'] = merged_df2.apply(lambda row: 'Valido' if row['validado'] >= 1 else 'No cumple', axis=1)
+merged_df2['validado2'] = merged_df2.apply(lambda row: 'Válido' if row['validado'] >= 1 else 'No cumple', axis=1)
 merged_df2['def_fec'] = pd.to_datetime(merged_df2['def_fec'])
 merged_df2['Año'] = merged_df2['def_fec'].dt.year
 
@@ -248,7 +248,7 @@ layout = dbc.Container([
                         ]],
                         style_table={
                             'overflowX': 'auto',
-                            'border': 'thin lightgrey solid',
+                            'border': 'thin white solid',
                             'fontFamily': 'Calibri',
                             'font-size': '12px',
                             'width': '100%',
@@ -307,6 +307,10 @@ layout = dbc.Container([
                         {
                             'if': {'column_id': 'Estado'},
                             'textAlign': 'center'
+                        },
+                        {
+                            'if': {'row_index': 'odd'},
+                            'backgroundColor': 'rgb(244, 250, 253)',
                         }
                     ],fixed_rows={'headers': True},
                     sort_action='native',  # Habilitar clasificación
@@ -314,7 +318,7 @@ layout = dbc.Container([
                 ], style={'padding-bottom': '0px', 'margin-bottom': '0px'})
             ], style={'padding-bottom': '0px', 'margin-bottom': '0px'})
         ]),
-        style={'border': '1px solid #95D3E9', 'padding': '0px', 'border-radius': '5px','height':'700px','margin-bottom':'45px'}
+        style={'border': '1px solid #95D3E9', 'padding': '0px', 'border-radius': '5px','height':'800px','margin-bottom':'45px'}
     ),
     dcc.Interval(
         id='interval-component',

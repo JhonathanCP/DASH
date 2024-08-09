@@ -2,13 +2,18 @@ import dash
 from dash import html, dcc
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
+from flask import Flask
 
-# Inicializar la aplicación Dash
-app = dash.Dash(__name__)
+# Inicializar el servidor Flask y la aplicación Dash
+server = Flask(__name__)
+app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = "Proyecto Dash"
 
-external_stylesheets = [dbc.themes.BOOTSTRAP]
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+# Importar la función para crear la ruta de exportación de CSV
+from miconsulta import create_csv_export_route
+
+# Registrar la ruta de exportación de CSV
+create_csv_export_route(server)
 
 # Establecer el layout principal de la aplicación
 app.layout = html.Div([
