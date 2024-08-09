@@ -26,6 +26,11 @@ def create_csv_export_route(server):
             )
 
             # Eliminar la columna de origen (ajustar según la columna específica que desees eliminar)
+            servicios_ipress_total.drop(columns=['cod_red_asistencial'], inplace=True, errors='ignore')
+            servicios_ipress_total.drop(columns=['cod_centro'], inplace=True, errors='ignore')
+            servicios_ipress_total.drop(columns=['cod_area'], inplace=True, errors='ignore')
+            servicios_ipress_total.drop(columns=['nivel'], inplace=True, errors='ignore')
+            servicios_ipress_total.drop(columns=['codservicio'], inplace=True, errors='ignore')
             servicios_ipress_total.drop(columns=['origen'], inplace=True, errors='ignore')
 
             # Convertir el DataFrame a un archivo CSV en memoria
