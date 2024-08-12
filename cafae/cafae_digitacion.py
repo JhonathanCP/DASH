@@ -108,8 +108,8 @@ def aplicar_condiciones3(row):
 layout = dbc.Container([
     html.Div(style={'height': '12px'}),
 
-    html.H1("Elecciones CAFAE 2024: Digitalización de actas", style={'color': '#0064AF', 'fontSize': '28px'}),
-    html.H2("Fuente: CAFAE. Actualizado al 09/08/2024. Actualización diaria. Pendiente de validar. V.1.0.0", style={'color': '#0064AF', 'fontSize': '12px'}),
+    html.H1("Elecciones CAFAE 2024: Digitación de actas", style={'color': '#0064AF', 'fontSize': '28px'}),
+    # html.H2("Fuente: CAFAE. Actualizado al 09/08/2024. Actualización diaria. Pendiente de validar. V.1.0.0", style={'color': '#0064AF', 'fontSize': '12px'}),
     html.Hr(style={'border': '1px solid #0064AF'}),
 
     dbc.Card(
@@ -201,7 +201,7 @@ layout = dbc.Container([
 
     # Botón para descargar CSV
     html.Button("Descargar CSV", id="btn_csv", n_clicks=0, className="btn btn-primary"),
-    dcc.Download(id="download-dataframe-csv"),
+    dcc.Download(id="download-dataframe-csv-digitacion"),
 
 ], fluid=True)
 
@@ -409,7 +409,7 @@ layout = dbc.Container([
 
     # Botón para descargar CSV
     html.Button("Descargar CSV", id="btn_csv", n_clicks=0, className="btn btn-primary"),
-    dcc.Download(id="download-dataframe-csv"),
+    dcc.Download(id="download-dataframe-csv-digitacion"),
 
 ], fluid=True)
 
@@ -417,7 +417,7 @@ def register_callbacks(app):
     @app.callback(
         Output('filter-red-digitacion', 'options'),
         Output('filter-tipo-eleccion-digitacion', 'options'),
-        Output('table-digitacion', 'data-digitacion'),
+        Output('table-digitacion', 'data'),
         [
             Input('filter-red-digitacion', 'value'),
             Input('filter-tipo-eleccion-digitacion', 'value'),
@@ -442,7 +442,7 @@ def register_callbacks(app):
         return RED_DIGITACION, Tipo_eleccion_digitacion, filtered_df_digitacion.to_dict('records')
 
     @app.callback(
-        Output("download-dataframe-csv", "data-digitacion"),
+        Output("download-dataframe-csv-digitacion", "data"),
         Input("btn_csv", "n_clicks"),
         State('filter-red-digitacion', 'value'),
         State('filter-tipo-eleccion-digitacion', 'value'),

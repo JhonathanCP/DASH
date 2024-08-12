@@ -9,51 +9,25 @@ from dash import dash_table
 def create_connection():
     return create_engine('postgresql://postgres:SDIBD2023$@10.0.1.230:5433/dbcafae')
 
-def fetch_data():
-    engine = create_connection()
-    with engine.connect() as conn:
-        query = "SELECT * FROM cab_acta"
-        result = pd.read_sql(query, conn)
-    engine.dispose()  # Cierra la conexión
-    return result
-
-def fetch_data2():
-    engine = create_connection()
-    with engine.connect() as conn:
-        query = "SELECT * FROM eleccion"
-        result = pd.read_sql(query, conn)
-    engine.dispose()  # Cierra la conexión
-    return result
-
-def fetch_data3():
-    engine = create_connection()
-    with engine.connect() as conn:
-        query = "SELECT * FROM ubigeo"
-        result = pd.read_sql(query, conn)
-    engine.dispose()  # Cierra la conexión
-    return result
-
-def fetch_data4():
-    engine = create_connection()
-    with engine.connect() as conn:
-        query = "SELECT * FROM ubieleccion"
-        result = pd.read_sql(query, conn)
-    engine.dispose()  # Cierra la conexión
-    return result
-
 def fetch_and_process_data():
-    cab_acta = fetch_data()
-    eleccion = fetch_data2()
-    ubigeo = fetch_data3()
-    ubieleccion = fetch_data4()
+    engine = create_connection()
+    
+    # Consultas a la base de datos
+    with engine.connect() as conn:
+        cab_acta = pd.read_sql("SELECT * FROM cab_acta", conn)
+        eleccion = pd.read_sql("SELECT * FROM eleccion", conn)
+        ubigeo = pd.read_sql("SELECT * FROM ubigeo", conn)
+        ubieleccion = pd.read_sql("SELECT * FROM ubieleccion", conn)
+    
+    # Cerrar la conexión a la base de datos
+    engine.dispose()
 
+    # Procesamiento de datos
     eleccion = eleccion.rename(columns={'n_cod_pk': 'n_eleccion_fk'})
     ubigeo = ubigeo.rename(columns={'n_cod_pk': 'n_ubigeo_fk'})
-    
     merge1 = pd.merge(ubieleccion, eleccion[['n_eleccion_fk', 'c_descripcion']], on='n_eleccion_fk', how='left')
     dim = pd.merge(merge1, ubigeo[['n_ubigeo_fk', 'c_desc_ubigeo']], on='n_ubigeo_fk', how='left')
     dim = dim.rename(columns={'n_cod_pk': 'n_ubigeo_fk', 'n_ubigeo_fk': 'ubigeo'})
-    
     tab_cab_acta = pd.merge(cab_acta, dim[['n_ubigeo_fk', 'c_descripcion', 'c_desc_ubigeo']], how='left', on='n_ubigeo_fk')
     tab_cab_acta['c_estado_digtal'] = tab_cab_acta['c_estado_digtal'].astype(int)
 
@@ -61,7 +35,7 @@ def fetch_and_process_data():
     tab_cab_acta['DIGITACION'] = tab_cab_acta.apply(aplicar_condiciones2, axis=1)
     tab_cab_acta['VERIFICACION'] = tab_cab_acta.apply(aplicar_condiciones3, axis=1)
 
-    df_pivot_table = tab_cab_acta.pivot_table(index=['c_desc_ubigeo', 'c_numero', 'c_descripcion'], columns='DIGITALIZACION', aggfunc='size', fill_value=0)
+    df_pivot_table = tab_cab_acta.pivot_table(index=['c_desc_ubigeo', 'c_numero', 'c_descripcion'], columns='VERIFICACION', aggfunc='size', fill_value=0)
     df_pivot_table_reset = df_pivot_table.reset_index()
 
     df_pivot_table_reset = df_pivot_table_reset.rename(columns={'c_desc_ubigeo': 'RED', 'c_descripcion': 'TIPO DE ELECCION', 'c_numero': 'NÚMERO DE ACTA'})
@@ -110,7 +84,7 @@ def aplicar_condiciones3(row):
 layout = dbc.Container([
     html.Div(style={'height': '12px'}),
 
-    html.H1("Elecciones CAFAE 2024: Digitalización de actas", style={'color': '#0064AF', 'fontSize': '28px'}),
+    html.H1("Elecciones CAFAE 2024: Verificación de actas", style={'color': '#0064AF', 'fontSize': '28px'}),
     # html.H2("Fuente: CAFAE. Actualizado al 09/08/2024. Actualización diaria. Pendiente de validar. V.1.0.0", style={'color': '#0064AF', 'fontSize': '12px'}),
     html.Hr(style={'border': '1px solid #0064AF'}),
 
@@ -120,7 +94,7 @@ layout = dbc.Container([
                 dbc.Col([
                     html.Label("RED", style={'font-size': '16px', 'color': '#0064AF'}),
                     dcc.Dropdown(
-                        id='filter-red',
+                        id='filter-red-verificacion',
                         options=[],  # Las opciones se llenarán en el callback
                         placeholder="Selecciona una RED",
                         style={'font-size': '14px', 'height': '40px'},
@@ -132,7 +106,7 @@ layout = dbc.Container([
                 dbc.Col([
                     html.Label("Tipo de elección", style={'font-size': '16px', 'color': '#0064AF'}),
                     dcc.Dropdown(
-                        id='filter-tipo-eleccion',
+                        id='filter-tipo-eleccion-verificacion',
                         options=[],  # Las opciones se llenarán en el callback
                         placeholder="Selecciona un tipo de elección",
                         style={'font-size': '14px', 'height': '40px'},
@@ -157,9 +131,9 @@ layout = dbc.Container([
             dbc.Row([
                 dbc.Col([
                     dash_table.DataTable(
-                        id='table',
+                        id='table-verificacion',
                         columns=[{"name": i, "id": i} for i in [
-                            'RED', 'NÚMERO DE ACTA', 'NO TIENE IMAGEN', 'IMAGEN REGISTRADA', 'IMAGEN OBSERVADA'
+                            'RED','NÚMERO DE ACTA','COMPLETADA','OBSERVADA'
                         ]],
                         style_table={
                             'overflowX': 'auto',
@@ -188,9 +162,8 @@ layout = dbc.Container([
                         style_data_conditional=[
                             {'if': {'column_id': 'RED'}, 'textAlign': 'left'},
                             {'if': {'column_id': 'NÚMERO DE ACTA'}, 'textAlign': 'left'},
-                            {'if': {'column_id': 'NO TIENE IMAGEN'}, 'textAlign': 'center'},
-                            {'if': {'column_id': 'IMAGEN REGISTRADA'}, 'textAlign': 'center'},
-                            {'if': {'column_id': 'IMAGEN OBSERVADA'}, 'textAlign': 'center'},
+                            {'if': {'column_id': 'COMPLETADA'}, 'textAlign': 'center'},
+                            {'if': {'column_id': 'OBSERVADA'}, 'textAlign': 'center'},
                         ],
                         fixed_rows={'headers': True},
                         sort_action='native',
@@ -203,18 +176,18 @@ layout = dbc.Container([
 
     # Botón para descargar CSV
     html.Button("Descargar CSV", id="btn_csv", n_clicks=0, className="btn btn-primary"),
-    dcc.Download(id="download-dataframe-csv-digitalizacion"),
+    dcc.Download(id="download-dataframe-csv-verificacion"),
 
 ], fluid=True)
 
 def register_callbacks(app):
     @app.callback(
-        Output('filter-red', 'options'),
-        Output('filter-tipo-eleccion', 'options'),
-        Output('table', 'data'),
+        Output('filter-red-verificacion', 'options'),
+        Output('filter-tipo-eleccion-verificacion', 'options'),
+        Output('table-verificacion', 'data'),
         [
-            Input('filter-red', 'value'),
-            Input('filter-tipo-eleccion', 'value'),
+            Input('filter-red-verificacion', 'value'),
+            Input('filter-tipo-eleccion-verificacion', 'value'),
             Input('filter-numero_acta', 'value')
         ]
     )
@@ -236,10 +209,10 @@ def register_callbacks(app):
         return RED, Tipo_eleccion, filtered_df.to_dict('records')
 
     @app.callback(
-        Output("download-dataframe-csv-digitalizacion", "data"),
+        Output("download-dataframe-csv-verificacion", "data"),
         Input("btn_csv", "n_clicks"),
-        State('filter-red', 'value'),
-        State('filter-tipo-eleccion', 'value'),
+        State('filter-red-verificacion', 'value'),
+        State('filter-tipo-eleccion-verificacion', 'value'),
         State('filter-numero_acta', 'value'),
         prevent_initial_call=True,
     )
@@ -255,4 +228,4 @@ def register_callbacks(app):
         if search_numero_acta:
             filtered_df = filtered_df[filtered_df['NÚMERO DE ACTA'].astype(str).str.contains(search_numero_acta)]
         
-        return dcc.send_data_frame(filtered_df.to_csv, "actas_report.csv", sep=';', index=False)
+        return dcc.send_data_frame(filtered_df.to_csv, "actas_report_verificacion.csv", sep=';', index=False)

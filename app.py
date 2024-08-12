@@ -50,6 +50,12 @@ def display_page(pathname):
             register_callbacks_digitacion(app)
             app.digitacion_callbacks_registered = True
         return digitacion_layout
+    elif pathname == '/cafae/verificacion':
+        from cafae.cafae_verificacion import layout as verificacion_layout, register_callbacks as register_callbacks_verificacion
+        if not hasattr(app, 'verificacion_callbacks_registered'):
+            register_callbacks_verificacion(app)
+            app.verificacion_callbacks_registered = True
+        return verificacion_layout
     else:
         return html.Div([
             html.H1("Bienvenido a la aplicación Dash"),
