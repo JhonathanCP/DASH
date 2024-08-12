@@ -9,25 +9,51 @@ from dash import dash_table
 def create_connection():
     return create_engine('postgresql://postgres:SDIBD2023$@10.0.1.230:5433/dbcafae')
 
-def fetch_and_process_data():
+def fetch_data():
     engine = create_connection()
-    
-    # Consultas a la base de datos
     with engine.connect() as conn:
-        cab_acta = pd.read_sql("SELECT * FROM cab_acta", conn)
-        eleccion = pd.read_sql("SELECT * FROM eleccion", conn)
-        ubigeo = pd.read_sql("SELECT * FROM ubigeo", conn)
-        ubieleccion = pd.read_sql("SELECT * FROM ubieleccion", conn)
-    
-    # Cerrar la conexión a la base de datos
-    engine.dispose()
+        query = "SELECT * FROM cab_acta"
+        result = pd.read_sql(query, conn)
+    engine.dispose()  # Cierra la conexión
+    return result
 
-    # Procesamiento de datos
+def fetch_data2():
+    engine = create_connection()
+    with engine.connect() as conn:
+        query = "SELECT * FROM eleccion"
+        result = pd.read_sql(query, conn)
+    engine.dispose()  # Cierra la conexión
+    return result
+
+def fetch_data3():
+    engine = create_connection()
+    with engine.connect() as conn:
+        query = "SELECT * FROM ubigeo"
+        result = pd.read_sql(query, conn)
+    engine.dispose()  # Cierra la conexión
+    return result
+
+def fetch_data4():
+    engine = create_connection()
+    with engine.connect() as conn:
+        query = "SELECT * FROM ubieleccion"
+        result = pd.read_sql(query, conn)
+    engine.dispose()  # Cierra la conexión
+    return result
+
+def fetch_and_process_data():
+    cab_acta = fetch_data()
+    eleccion = fetch_data2()
+    ubigeo = fetch_data3()
+    ubieleccion = fetch_data4()
+
     eleccion = eleccion.rename(columns={'n_cod_pk': 'n_eleccion_fk'})
     ubigeo = ubigeo.rename(columns={'n_cod_pk': 'n_ubigeo_fk'})
+    
     merge1 = pd.merge(ubieleccion, eleccion[['n_eleccion_fk', 'c_descripcion']], on='n_eleccion_fk', how='left')
     dim = pd.merge(merge1, ubigeo[['n_ubigeo_fk', 'c_desc_ubigeo']], on='n_ubigeo_fk', how='left')
     dim = dim.rename(columns={'n_cod_pk': 'n_ubigeo_fk', 'n_ubigeo_fk': 'ubigeo'})
+    
     tab_cab_acta = pd.merge(cab_acta, dim[['n_ubigeo_fk', 'c_descripcion', 'c_desc_ubigeo']], how='left', on='n_ubigeo_fk')
     tab_cab_acta['c_estado_digtal'] = tab_cab_acta['c_estado_digtal'].astype(int)
 
@@ -80,7 +106,7 @@ def aplicar_condiciones3(row):
         return 'COMPLETADA'
     else:
         return ""
-    
+
 def aplicar_condiciones4(row):
     if row['c_estado_digtal'] == 0:
         return 'ACTA PENDIENTE DE REGISTRO'
@@ -91,7 +117,6 @@ def aplicar_condiciones4(row):
     else:
         return ""
 
-# Layout de la aplicación Dash
 layout = dbc.Container([
     html.Div(style={'height': '12px'}),
 
@@ -266,6 +291,8 @@ layout = dbc.Container([
 
 def register_callbacks(app):
     @app.callback(
+        Output('filter-red-administracion', 'options'),
+        Output('filter-tipo-eleccion-administracion', 'options'),
         Output('table-administracion', 'data'),
         Output('table-agrupada-red-administracion', 'data'),
         [
@@ -276,18 +303,27 @@ def register_callbacks(app):
     )
     def update_data(selected_red, selected_tipo_eleccion, search_numero_acta):
         df_pivot_table_reset = fetch_and_process_data()
-
+        
         RED = [{'label': value, 'value': value} for value in df_pivot_table_reset['RED'].unique()]
         Tipo_eleccion = [{'label': value, 'value': value} for value in df_pivot_table_reset['TIPO DE ELECCION'].unique()]
 
         filtered_df = df_pivot_table_reset
-
+        
         if selected_red:
             filtered_df = filtered_df[filtered_df['RED'] == selected_red]
         if selected_tipo_eleccion:
             filtered_df = filtered_df[filtered_df['TIPO DE ELECCION'] == selected_tipo_eleccion]
         if search_numero_acta:
             filtered_df = filtered_df[filtered_df['NÚMERO DE ACTA'].astype(str).str.contains(search_numero_acta)]
+
+        # Verifica la existencia de las columnas antes de agrupar
+        required_columns = ['ACTA PENDIENTE DE REGISTRO', 'ACTA PENDIENTE DE DIGITACIÓN', 'ACTA PENDIENTE DE VERIFICACIÓN']
+        missing_columns = [col for col in required_columns if col not in filtered_df.columns]
+
+        if missing_columns:
+            # Manejar el caso donde faltan columnas
+            for col in missing_columns:
+                filtered_df[col] = 0  # Asignar un valor predeterminado, por ejemplo, 0
 
         # Agrupar la información por RED
         grouped_df = filtered_df.groupby('RED').agg({
@@ -297,10 +333,10 @@ def register_callbacks(app):
             'ACTA PENDIENTE DE VERIFICACIÓN': 'sum'
         }).reset_index()
 
-        # Renombrar columnas para la tabla agrupada
-        grouped_df.columns = ['RED', 'TOTAL ACTAS', 'ACTA PENDIENTE DE REGISTRO', 'ACTA PENDIENTE DE DIGITACIÓN', 'ACTA PENDIENTE DE VERIFICACIÓN']
+        grouped_df['TOTAL ACTAS'] = grouped_df['ACTA PENDIENTE DE REGISTRO'] + grouped_df['ACTA PENDIENTE DE DIGITACIÓN'] + grouped_df['ACTA PENDIENTE DE VERIFICACIÓN']
 
-        return filtered_df.to_dict('records'), grouped_df.to_dict('records')
+        return RED, Tipo_eleccion, filtered_df.to_dict('records'), grouped_df.to_dict('records')
+
 
     @app.callback(
         Output("download-dataframe-csv-administracion", "data"),
@@ -312,14 +348,14 @@ def register_callbacks(app):
     )
     def download_as_csv(n_clicks, selected_red, selected_tipo_eleccion, search_numero_acta):
         df_pivot_table_reset = fetch_and_process_data()
-
+        
         filtered_df = df_pivot_table_reset
-
+        
         if selected_red:
             filtered_df = filtered_df[filtered_df['RED'] == selected_red]
         if selected_tipo_eleccion:
             filtered_df = filtered_df[filtered_df['TIPO DE ELECCION'] == selected_tipo_eleccion]
         if search_numero_acta:
             filtered_df = filtered_df[filtered_df['NÚMERO DE ACTA'].astype(str).str.contains(search_numero_acta)]
-
+        
         return dcc.send_data_frame(filtered_df.to_csv, "actas_report.csv", sep=';', index=False)
