@@ -118,7 +118,7 @@ layout = dbc.Container([
                 dbc.Col([
                     html.Label("RED", style={'font-size': '16px', 'color': '#0064AF'}),
                     dcc.Dropdown(
-                        id='filter-red',
+                        id='filter-red-digitacion',
                         options=[],  # Las opciones se llenarán en el callback
                         placeholder="Selecciona una RED",
                         style={'font-size': '14px', 'height': '40px'},
@@ -130,7 +130,7 @@ layout = dbc.Container([
                 dbc.Col([
                     html.Label("Tipo de elección", style={'font-size': '16px', 'color': '#0064AF'}),
                     dcc.Dropdown(
-                        id='filter-tipo-eleccion',
+                        id='filter-tipo-eleccion-digitacion',
                         options=[],  # Las opciones se llenarán en el callback
                         placeholder="Selecciona un tipo de elección",
                         style={'font-size': '14px', 'height': '40px'},
@@ -155,7 +155,7 @@ layout = dbc.Container([
             dbc.Row([
                 dbc.Col([
                     dash_table.DataTable(
-                        id='table',
+                        id='table-digitacion',
                         columns=[{"name": i, "id": i} for i in [
                             'RED', 'NÚMERO DE ACTA','PENDIENTE DE DIGITACION', 'IMAGEN OBSERVADA','COMPLETADA'
                         ]],
@@ -326,7 +326,7 @@ layout = dbc.Container([
                 dbc.Col([
                     html.Label("RED", style={'font-size': '16px', 'color': '#0064AF'}),
                     dcc.Dropdown(
-                        id='filter-red',
+                        id='filter-red-digitacion',
                         options=[],  # Las opciones se llenarán en el callback
                         placeholder="Selecciona una RED",
                         style={'font-size': '14px', 'height': '40px'},
@@ -338,7 +338,7 @@ layout = dbc.Container([
                 dbc.Col([
                     html.Label("Tipo de elección", style={'font-size': '16px', 'color': '#0064AF'}),
                     dcc.Dropdown(
-                        id='filter-tipo-eleccion',
+                        id='filter-tipo-eleccion-digitacion',
                         options=[],  # Las opciones se llenarán en el callback
                         placeholder="Selecciona un tipo de elección",
                         style={'font-size': '14px', 'height': '40px'},
@@ -363,7 +363,7 @@ layout = dbc.Container([
             dbc.Row([
                 dbc.Col([
                     dash_table.DataTable(
-                        id='table',
+                        id='table-digitacion',
                         columns=[{"name": i, "id": i} for i in [
                             'RED', 'NÚMERO DE ACTA','PENDIENTE DE DIGITACION', 'IMAGEN OBSERVADA','COMPLETADA'
                         ]],
@@ -415,12 +415,12 @@ layout = dbc.Container([
 
 def register_callbacks(app):
     @app.callback(
-        Output('filter-red', 'options'),
-        Output('filter-tipo-eleccion', 'options'),
-        Output('table', 'data'),
+        Output('filter-red-digitacion', 'options'),
+        Output('filter-tipo-eleccion-digitacion', 'options'),
+        Output('table-digitacion', 'data-digitacion'),
         [
-            Input('filter-red', 'value'),
-            Input('filter-tipo-eleccion', 'value'),
+            Input('filter-red-digitacion', 'value'),
+            Input('filter-tipo-eleccion-digitacion', 'value'),
             Input('filter-numero_acta', 'value')
         ]
     )
@@ -442,10 +442,10 @@ def register_callbacks(app):
         return RED_DIGITACION, Tipo_eleccion_digitacion, filtered_df_digitacion.to_dict('records')
 
     @app.callback(
-        Output("download-dataframe-csv", "data"),
+        Output("download-dataframe-csv", "data-digitacion"),
         Input("btn_csv", "n_clicks"),
-        State('filter-red', 'value'),
-        State('filter-tipo-eleccion', 'value'),
+        State('filter-red-digitacion', 'value'),
+        State('filter-tipo-eleccion-digitacion', 'value'),
         State('filter-numero_acta', 'value'),
         prevent_initial_call=True,
     )
