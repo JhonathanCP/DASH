@@ -12,6 +12,7 @@ app.title = "Proyecto Dash"
 # Importar la función para crear la ruta de exportación de CSV
 from miconsulta import create_csv_export_route
 
+
 # Registrar la ruta de exportación de CSV
 create_csv_export_route(server)
 
@@ -37,6 +38,18 @@ def display_page(pathname):
             register_callbacks_reporte2(app)
             app.reporte2_callbacks_registered = True
         return reporte2_layout
+    elif pathname == '/cafae/digitalizacion':
+        from cafae.cafae_digitalizacion import layout as elecciones_layout, register_callbacks as register_callbacks_elecciones
+        if not hasattr(app, 'elecciones_callbacks_registered'):
+            register_callbacks_elecciones(app)
+            app.elecciones_callbacks_registered = True
+        return elecciones_layout
+    elif pathname == '/cafae/digitacion':
+        from cafae.cafae_digitacion import layout as digitacion_layout, register_callbacks as register_callbacks_digitacion
+        if not hasattr(app, 'digitacion_callbacks_registered'):
+            register_callbacks_digitacion(app)
+            app.digitacion_callbacks_registered = True
+        return digitacion_layout
     else:
         return html.Div([
             html.H1("Bienvenido a la aplicación Dash"),
