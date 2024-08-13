@@ -32,7 +32,7 @@ def display_page(pathname):
             register_callbacks_sgdredes(app)
             app.sgdredes_callbacks_registered = True
         return sgdredes_layout
-    elif pathname == '/reporte2':
+    elif pathname == '/dengue/detalle':
         from reporte2 import layout as reporte2_layout, register_callbacks as register_callbacks_reporte2
         if not hasattr(app, 'reporte2_callbacks_registered'):
             register_callbacks_reporte2(app)
