@@ -257,7 +257,7 @@ layout = dbc.Container([
             dbc.Row([
                 dbc.Col([
                     dash_table.DataTable(
-                        id='table',
+                        id='table-dengue',
                         columns=[{"name": i, "id": i} for i in [
                             'ID', 'Área', 'CIE10', 'Principal motivo de consulta','Otros motivos de consulta', 'Fecha de defunción', 'IPRESS', 'Red', 'Estado'
                         ]],
@@ -346,7 +346,7 @@ layout = dbc.Container([
 
 def register_callbacks(app):
     @app.callback(
-        Output('table', 'data'),
+        Output('table-dengue', 'data'),
         [
             Input('filter-des_red', 'value'),
             Input('filter-des_cas', 'value'),
