@@ -225,7 +225,15 @@ layout = dbc.Container([
                         maxHeight=150
                     )
                 ], width=2),
-
+                dbc.Col([
+                    dbc.Card(
+                        dbc.CardBody([
+                            html.H4("# Defunciones", className="card-title", style={'color': '#0064AF', 'fontSize': '12px', 'text-align': 'center','margin-top': '-1px','margin-bottom': '2px'}),
+                            html.Div(id='total-def', className="card-text", style={'color': '#0064AF', 'fontSize': '20px', 'text-align': 'center'})
+                        ]),
+                        style={'background-color': '#F4FAFD', 'border-color': '#35A2C1','height':'70px'}
+                    ),
+                ], width=1),
                 dbc.Col([
                     html.Div(
                         children=[
