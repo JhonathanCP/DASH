@@ -245,7 +245,7 @@ layout = dbc.Container([
                                 'text-align': 'center', 'font-size': '16px',
                                 'border-radius': '5px'
                             }),
-                            dcc.Download(id="download-dataframe-csv"),
+                            dcc.Download(id="download-dataframe-csv-dengue"),
                         ],
                         style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center', 'height': '100%'}
                     )
@@ -408,7 +408,7 @@ def register_callbacks(app):
         return f"{total_cit_num}"
     
     @app.callback(
-        Output("download-dataframe-csv", "data"),
+        Output("download-dataframe-csv-dengue", "data"),
         Input("btn_csv", "n_clicks"),
         prevent_initial_call=True,
     )
