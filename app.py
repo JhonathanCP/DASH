@@ -23,7 +23,7 @@ app.layout = html.Div([
 ])
 
 # Callback para manejar el contenido basado en la ruta
-@app.callback(Output('page-content', 'children'), 
+@app.callback(Output('page-content', 'children', allow_duplicate=True), 
               [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/sgdredes':
