@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Trámite</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        .container {
+            padding: 20px;
+        }
+        .header-img {
+            width: 100%;
+        }
+        .header-text {
+            color: #FFFFFF;
+            font-family: Calibri;
+        }
+        .header-title {
+            font-size: 28px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .header-subtitle {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .download-button {
+            background-color: #0064AF;
+            border-color: #0064AF;
+            color: white;
+            position: absolute;
+            right: 50px;
+            top: 23px;
+        }
+        .card-text {
+            font-size: 14px;
+            color: #606060;
+        }
+        .card-header {
+            font-size: 18px;
+            color: #606060;
+            font-family: Calibri;
+            text-align: center;
+            background-color: #F4FAFD;
+            margin-bottom: 10px;
+        }
+        .search-button {
+            background-color: #0064AF;
+            border-color: #0064AF;
+            color: white;
+            width: 10%;
+            height: 60%;
+            margin-top: 23px;
+        }
+        .margin-bottom {
+            margin-bottom: 10px;
+        }
+        .text-align-center {
+            text-align: center;
+        }
+        .font-weight-bold {
+            font-weight: bold;
+        }
+        .position-relative {
+            position: relative;
+        }
+        .position-absolute {
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="position-relative">
+            <img src="/assets/encabezado.png" class="header-img" alt="Encabezado">
+            <div class="position-absolute" >
+                <h1 class="header-text header-title">Seguimiento del trámite</h1>
+            </div>
+            <div style="height: 12px;"></div>
+
+            <div class="row margin-bottom position-relative">
+                <div class="col-12">
+                    <div class="position-relative">
+                        <button class="btn download-button" id="download-button">Descargar CSV</button>
+                        <div class="position-absolute" style="top: 0; right: 0; width: 150px;"></div>
+                    </div>
+                </div>
+
+                <div class="col-2">
+                    <h6 class="font-weight-normal text-dark">Red</h6>
+                    <select class="form-control" id="filter-red" placeholder="Seleccione una Red">
+                        <!-- Options should be populated dynamically -->
+                        <option value="">Seleccione una Red</option>
+                        <!-- Example options -->
+                        <option value="Red1">Red1</option>
+                        <option value="Red2">Red2</option>
+                    </select>
+                </div>
+
+                <div class="col-6">
+                    <h6 class="font-weight-normal text-dark"># Expediente</h6>
+                    <input type="text" id="filter-expediente" class="form-control" placeholder="Buscar...">
+                </div>
+
+                <div class="col-3">
+                    <button class="btn search-button" id="search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <p id="razon-social" class="card-text">Razón Social</p>
+                            <p id="min-fecha" class="card-text">Fecha</p>
+                            <p id="tipdoc" class="card-text">Tipo de Documento</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <h6 class="font-weight-normal text-primary text-align-center">Asunto</h6>
+                    <div class="card">
+                        <div class="card-body card-header">
+                            <p id="asunto" class="card-text">Asunto</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div id="table-container">
+                        <!-- DataTable will be rendered here -->
+                    </div>
+                    <a id="download-dataframe-csv" href="#" class="btn btn-primary">Download CSV</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

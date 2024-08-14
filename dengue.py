@@ -1,6 +1,6 @@
 import dash
 from dash import dcc, html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine
@@ -225,7 +225,6 @@ layout = dbc.Container([
                         maxHeight=150
                     )
                 ], width=2),
-
                 dbc.Col([
                     dbc.Card(
                         dbc.CardBody([
@@ -235,7 +234,6 @@ layout = dbc.Container([
                         style={'background-color': '#F4FAFD', 'border-color': '#35A2C1','height':'70px'}
                     ),
                 ], width=1),
-
                 dbc.Col([
                     html.Div(
                         children=[
@@ -257,7 +255,7 @@ layout = dbc.Container([
             dbc.Row([
                 dbc.Col([
                     dash_table.DataTable(
-                        id='table',
+                        id='table-dengue',
                         columns=[{"name": i, "id": i} for i in [
                             'ID', 'Área', 'CIE10', 'Principal motivo de consulta','Otros motivos de consulta', 'Fecha de defunción', 'IPRESS', 'Red', 'Estado'
                         ]],
@@ -346,7 +344,7 @@ layout = dbc.Container([
 
 def register_callbacks(app):
     @app.callback(
-        Output('table', 'data'),
+        Output('table-dengue', 'data'),
         [
             Input('filter-des_red', 'value'),
             Input('filter-des_cas', 'value'),
@@ -410,15 +408,36 @@ def register_callbacks(app):
     @app.callback(
         Output("download-dataframe-csv-dengue", "data"),
         Input("btn_csv", "n_clicks"),
+        State('filter-des_red', 'value'),
+        State('filter-des_cas', 'value'),
+        State('filter-des_are', 'value'),
+        State('filter-validado', 'value'),
+        State('filter-id', 'value'),
+        State('filter-año', 'value'),
         prevent_initial_call=True,
     )
-    def download_as_csv(n_clicks):
+    def download_as_csv(n_clicks, selected_red, selected_cas, selected_are, selected_validado, selected_id, selected_año):
+        filtered_df2 = merged_df2
+
+        if selected_red:
+            filtered_df2 = filtered_df2[filtered_df2['Red'] == selected_red]
+        if selected_cas:
+            filtered_df2 = filtered_df2[filtered_df2['IPRESS'] == selected_cas]
+        if selected_are:
+            filtered_df2 = filtered_df2[filtered_df2['Área'] == selected_are]
+        if selected_validado:
+            filtered_df2 = filtered_df2[filtered_df2['Estado'] == selected_validado]
+        if selected_id:
+            filtered_df2 = filtered_df2[filtered_df2['ID'] == selected_id]
+        if selected_año:
+            filtered_df2 = filtered_df2[filtered_df2['Año'] == selected_año]
+        
         columns_to_include = [
             'ID', 'Área', 'CIE10', 'Principal motivo de consulta', 
             'Otros motivos de consulta', 'Fecha de defunción', 
             'IPRESS', 'Red', 'Estado'
         ]
         
-        filtered_df2 = merged_df2[columns_to_include]
+        filtered_df2 = filtered_df2[columns_to_include]
         
         return dcc.send_data_frame(filtered_df2.to_csv, "defunciones_dengue.csv", sep=';', index=False)
