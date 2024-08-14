@@ -1,17 +1,10 @@
 import dash
-from dash import dcc, html
-from dash.dependencies import Input, Output, State
-import plotly.express as px
-import pandas as pd
+from dash import dcc, html, Output, Input, State
+import dash_bootstrap_components as dbc
 import pandas as pd
 from sqlalchemy import create_engine
-import sys
-import plotly.graph_objects as go
-import json
-import dash_bootstrap_components as dbc
 from dash import dash_table
-import numpy as np
-
+import io
 # Función para crear una conexión a la base de datos
 def create_connection():
     try:
@@ -53,14 +46,14 @@ def fetch_data(des_red, nu_expediente):
                         COALESCE(CONCAT(tdtr_otro_origen.de_nom_otr, ' ', tdtr_otro_origen.de_ape_pat_otr, ' ', tdtr_otro_origen.de_ape_mat_otr), ''),
                         ' ',
                         COALESCE(lg_pro_proveedor.cpro_razsoc, '')
-                    ) as NOMBRE_COMPLETO,
-                    tdtc_expediente.nu_expediente as NRO_EXPEDIENTE,
-                    si_mae_tipo_doc.cdoc_desdoc as CLASE_DOCUMENTO,
-                    tdtv_remitos.de_asu as ASUNTO,
-                    tdtv_remitos.fe_emi as FECHA_ENVIO,
-                    rhtm_dependencia_or.de_dependencia as ORIGEN,
-                    tdtv_destinos.fe_rec_doc as FECHA_ACEPTACION,
-                    rhtm_dependencia_dest.de_dependencia as DESTINO,
+                    ) AS NOMBRE_COMPLETO,
+                    tdtc_expediente.nu_expediente AS NRO_EXPEDIENTE,
+                    si_mae_tipo_doc.cdoc_desdoc AS CLASE_DOCUMENTO,
+                    tdtv_remitos.de_asu AS ASUNTO,
+                    TO_CHAR(tdtv_remitos.fe_emi, 'DD/MM/YY HH24:MI') AS FECHA_ENVIO,
+                    rhtm_dependencia_or.de_dependencia AS ORIGEN,
+                    TO_CHAR(tdtv_destinos.fe_rec_doc, 'DD/MM/YY HH24:MI') AS FECHA_ACEPTACION,
+                    rhtm_dependencia_dest.de_dependencia AS DESTINO,
                     si_redes.des_red                   
                 FROM 
                     idosgd.tdtv_destinos 
@@ -135,33 +128,44 @@ layout = dbc.Container([
     # Filtros y botón en una sola fila
     dbc.Row([
         dbc.Col([
-            html.H6("Red", style={'font-size': '16px', 'color': '#606060', 'fontWeight': 'normal', 'fontFamily': 'Calibri'}),
+            html.H6("Red", style={'font-size': '14px', 'color': '#606060', 'fontWeight': 'normal', 'fontFamily': 'Calibri'}),
             dcc.Dropdown(
                 id='co_red_dropdown',
                 options=red_options,
                 placeholder='Seleccionar Código de Red',
-                style={'width': '100%'}
+                style={'width': '100%', 'fontSize': '14px'}
             )
-        ], width=3),
-        
+        ], width=12, md=12, lg=5, className='mb-2'),
+
         dbc.Col([
-            html.H6("# Expediente", style={'font-size': '16px', 'color': '#606060', 'fontWeight': 'normal', 'fontFamily': 'Calibri'}),
+            html.H6("# Expediente", style={'font-size': '14px', 'color': '#606060', 'fontWeight': 'normal', 'fontFamily': 'Calibri'}),
             dcc.Input(
                 id='nu_expediente_input',
                 type='text',
                 placeholder='Número de Expediente',
-                style={'width': '100%'}
+                style={'width': '85%', 'fontSize': '14px'},
+                className='mr-2',
+                debounce=True  # Esto permite activar el callback al presionar Enter
+            ),
+            dbc.Button(
+                html.I(className="fas fa-search"),
+                id='search-button',
+                style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white'},
+                className='align-middle'
             )
-        ], width=3),
+        ], width=12, md=12, lg=5, className='mb-2'),
         
         dbc.Col([
-                dbc.Button(
-                    html.I(className="fas fa-search"),
-                    id='search-button',
-                    style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white', 'width': '15%', 'height': '60%','margin-top': '23px'}
-                )
-            ], width=3)
-    ], style={'margin-bottom': '20px'}, className='px-4'),
+            dbc.Button(
+                [html.I(className="fas fa-file-excel"), html.Span(" Descargar datos")],
+                id='download-button',
+                style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white'},
+                className='align-middle'
+            ),
+            dcc.Download(id="download-csv")  # Añadimos este componente para la descarga
+        ], width=12, md=12, lg=2, className='mb-2 mt-4 text-center'),
+
+    ], className='px-4'),
 
     # Tarjetas para los valores de la primera fila
     dbc.Row([
@@ -172,71 +176,68 @@ layout = dbc.Container([
                     html.P(id="min-fecha", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
                     html.P(id="tipdoc", className="card-text", style={'font-size': '14px', 'color': '#606060'})
                 ]),
-                style={"margin-top": "0px", "padding": "0px", "border": "none"}
+                style={"margin-top": "10px", "padding": "0px", "border": "none"}
             )
-        ], width=12)
-    ], style={'width': '100%', 'margin': '0'}, className='px-4'),
+        ], width=12, md=6, lg=3,)
+    ], style={'margin': '0'}, className='px-4'),
 
     # Tarjeta del asunto
     dbc.Row([
         dbc.Col([
-            html.H6("Asunto", style={'font-size': '16px', 'color': '#0064AF', 'fontWeight': 'normal', 'fontFamily': 'Calibri', 'textAlign': 'center'}),
+            html.H6("Asunto", style={'font-size': '14px', 'color': '#0064AF', 'fontWeight': 'normal', 'fontFamily': 'Calibri', 'textAlign': 'center'}),
             dbc.Card(
                 dbc.CardBody([
-                    html.P(id="asunto", className="card-text", style={'font-size': '18px', 'color': '#606060', 'fontFamily': 'Calibri'}),
+                    html.P(id="asunto", className="card-text", style={'font-size': '16px', 'color': '#606060', 'fontFamily': 'Calibri'}),
                 ]),
-                style={"margin-top": "0px", "padding": "0px", "border": "none", "text-align":"center", 'font-weight': 'bold', 'background-color': '#F4FAFD', 'fontFamily': 'Calibri', 'margin-bottom': '10px'}
+                style={"margin-top": "10px", "padding": "0px", "border": "none", "text-align": "center", 'font-weight': 'bold', 'background-color': '#F4FAFD', 'margin-bottom': '10px'}
             )
         ], width=12)
-    ], style={'width': '100%', 'margin': '0'}, className='px-4'),
+    ], style={'margin': '0'}, className='px-4'),
 
     # Tabla de resultados
     dbc.Row([
         dbc.Col([
             html.Div(id='table_container'),
         ], width=12)
-    ], style={'margin-top': '20px'}, className='px-4'),
-    
+    ], style={'margin-top': '20px'}, className='px-4 pt-0'),
+
 ], fluid=True, className='p-0 m-0')
+
 
 def register_callbacks(app):
     @app.callback(
         [Output('table_container', 'children', allow_duplicate=True),
-        Output('razon-social', 'children', allow_duplicate=True),
-        Output('min-fecha', 'children', allow_duplicate=True),
-        Output('tipdoc', 'children', allow_duplicate=True),
-        Output('asunto', 'children', allow_duplicate=True)],
-        [Input('search-button', 'n_clicks')],
+         Output('razon-social', 'children', allow_duplicate=True),
+         Output('min-fecha', 'children', allow_duplicate=True),
+         Output('tipdoc', 'children', allow_duplicate=True),
+         Output('asunto', 'children', allow_duplicate=True)],
+        [Input('search-button', 'n_clicks'), 
+         Input('nu_expediente_input', 'n_submit')],
         [State('co_red_dropdown', 'value'),
-        State('nu_expediente_input', 'value')],
+         State('nu_expediente_input', 'value')],
         prevent_initial_call=True,
     )
-    def update_table(n_clicks, co_red, nu_expediente):
-        # Verificar si n_clicks es None o igual a 0
-        if n_clicks is None or n_clicks == 0:
+    def update_table(n_clicks, n_submit, co_red, nu_expediente):
+        if (n_clicks is None or n_clicks == 0) and (n_submit is None or n_submit == 0):
             return "", "", "", "", ""
-        
-        print(f"Button clicked with co_red: {co_red} and nu_expediente: {nu_expediente}")  # Línea para depuración
+
         data = fetch_data(co_red, nu_expediente)
-        
+
         if data is not None and not data.empty:
-            # Obtener las últimas 5 filas del DataFrame
             last_5_data = data.tail(5)
-            
-            # Extraer los valores de la primera fila
+
             first_row = data.iloc[0]
             razon_social = first_row['Razón Social']
             fecha_envio = first_row['Fecha de envío']
             clase_documento = first_row['Clase de documento']
             asunto = first_row['Asunto']
 
-            # Convertir DataFrame a formato de diccionario para DataTable
             data_dict = last_5_data.to_dict('records')
 
-            # Crear la tabla con estilo
             table = dash_table.DataTable(
                 id='table',
-                columns=[{"name": i, "id": i} for i in ['N° Expediente', 'Clase de documento', 'Asunto', 'Fecha de envío', 'Origen', 'Fecha de aceptación', 'Destino', 'Red']],
+                columns=[{"name": i, "id": i} for i in
+                         ['N° Expediente', 'Clase de documento', 'Asunto', 'Fecha de envío', 'Origen', 'Fecha de aceptación', 'Destino', 'Red']],
                 data=data_dict,
                 style_table={
                     'overflowX': 'auto',
@@ -274,6 +275,19 @@ def register_callbacks(app):
                     {'if': {'column_id': 'Razón Social'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px'}
                 ],
             )
-            return table, f"Razón social: {razon_social}", f"Fecha de Envío: {fecha_envio.strftime('%d/%m/%Y')}", f"Tipo de documento: {clase_documento}", asunto
+            return table, f"Razón social: {razon_social}", f"Fecha de Envío: {fecha_envio}", f"Tipo de documento: {clase_documento}", asunto
         else:
-            return "No se encontró información con los datos proporcionados. Intente nuevamente","","","",""
+            return "No se encontró información con los datos proporcionados. Intente nuevamente", "", "", "", ""
+
+    @app.callback(
+        Output("download-csv", "data"),
+        Input("download-button", "n_clicks"),
+        [State('co_red_dropdown', 'value'),
+         State('nu_expediente_input', 'value')],
+        prevent_initial_call=True,
+    )
+    def download_csv(n_clicks, co_red, nu_expediente):
+        data = fetch_data(co_red, nu_expediente)
+        if data is not None and not data.empty:
+            return dcc.send_data_frame(data.to_csv, "datos_tramite.csv")
+        return None
