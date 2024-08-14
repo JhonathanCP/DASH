@@ -3,7 +3,6 @@ from dash import dcc, html
 from dash.dependencies import Input, Output, State
 import plotly.express as px
 import pandas as pd
-import psycopg2
 import pandas as pd
 from sqlalchemy import create_engine
 import sys
@@ -12,13 +11,6 @@ import json
 import dash_bootstrap_components as dbc
 from dash import dash_table
 import numpy as np
-from jupyter_dash import JupyterDash
-#import pdfkit
-import base64
-from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-import io
 
 # Función para crear una conexión a la base de datos
 def create_connection():
