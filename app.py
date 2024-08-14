@@ -2,26 +2,16 @@ import dash
 from dash import html, dcc
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
-from flask import Flask
-from flask_caching import Cache
+from flask import Flask, render_template, jsonify
+from sgdredes.data_provider import get_data
 
 # Inicializar el servidor Flask y la aplicación Dash
-server = Flask(__name__)
+server = Flask(__name__, template_folder='templates')
 app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.BOOTSTRAP,
     'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css',  # Bootstrap CSS
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css']
 )
 app.title = "Proyecto Dash"
-
-# Configurar Flask-Caching con Redis
-cache = Cache()
-cache.init_app(app.server, config={
-    'CACHE_TYPE': 'RedisCache',
-    'CACHE_REDIS_HOST': 'localhost',  # Cambia esto si Redis está en otro servidor
-    'CACHE_REDIS_PORT': 6379,
-    'CACHE_REDIS_DB': 0,
-    'CACHE_DEFAULT_TIMEOUT': 3600  # 1 hora
-})
 
 # Importar la función para crear la ruta de exportación de CSV
 from miconsulta import create_csv_export_route
@@ -39,13 +29,6 @@ app.layout = html.Div([
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
-    # if pathname == '/sgdredes':
-    #     from sgdredes import layout as sgdredes_layout, register_callbacks as register_callbacks_sgdredes
-    #     if not hasattr(app, 'sgdredes_callbacks_registered'):
-    #         register_callbacks_sgdredes(app)
-    #         app.sgdredes_callbacks_registered = True
-    #     return sgdredes_layout
-
     if pathname == '/dengue/detalle':
         from dengue import layout as reporte2_layout, register_callbacks as register_callbacks_reporte2
         if not hasattr(app, 'reporte2_callbacks_registered'):
@@ -86,6 +69,18 @@ def display_page(pathname):
             html.H1("Bienvenido a la aplicación Dash"),
             html.P("Selecciona un reporte de las rutas disponibles.")
         ])
+
+# Ruta para servir el archivo HTML de SGD Red
+@server.route('/sgdredes')
+def sgdredes():
+    return render_template('sgdredes.html')
+
+# Ruta para proporcionar datos de prueba a través de la API
+@server.route('/api/data')
+def data():
+    # Utiliza la función get_data() para obtener los datos
+    data = get_data()
+    return jsonify(data)
 
 # Servidor
 if __name__ == '__main__':
