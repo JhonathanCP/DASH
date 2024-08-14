@@ -112,20 +112,39 @@ red_options = get_red_options()
 print(f"Red options: {red_options}")  # Debugging line
 
 layout = dbc.Container([
-    # Encabezado
-    dbc.Row([
-        dbc.Col([
-            html.Img(src='/assets/encabezado.png', style={'width': '101%'}),
-        ], width=12)
-    ], style={'position': 'relative', 'width': '101%'}),
-    
-    dbc.Row([
-        dbc.Col([
-            html.H1("Seguimiento del trámite", style={'color': '#FFFFFF', 'fontSize': '28px', 'textAlign': 'center', 'font-weight': 'bold', 'fontFamily': 'Calibri'}),
-        ], width=12, style={'position': 'absolute', 'top': '5.5%', 'left': '50%', 'transform': 'translate(-50%, -50%)'}),
-    ], style={'height': '12px'}, className='px-4'),
 
-    # Filtros y botón en una sola fila
+    dbc.Container(fluid=True, className="p-0", children=[
+    dbc.Navbar(
+        dbc.Container(fluid=True, className="d-flex justify-content-between align-items-center p-0", children=[
+            # Logo SGD Redes
+            dbc.Row([
+                dbc.Col([
+                    html.Img(src="/assets/logoSGDredes-blanco.png", alt="SGD", className="d-block d-lg-none", style={"width": "60px", "height": "auto"}),
+                    html.Img(src="/assets/logoSGDredes-blanco.png", alt="SGD", className="d-none d-lg-block", style={"width": "120px", "height": "auto"})
+                ], className="d-flex align-items-center"),
+            ]),
+
+            # Título Centrado
+            dbc.Row([
+                dbc.Col([
+                    html.H2("Seguimiento del trámite", className="mb-0 text-white d-none d-lg-block"),
+                    html.H3("Seguimiento del trámite", className="mb-0 text-white d-block d-lg-none", style={"fontSize": "1.25rem"})
+                ], className="text-center flex-grow-1"),
+            ]),
+
+            # Logo Essalud (Visible solo en pantallas grandes)
+            dbc.Row([
+                dbc.Col([
+                    html.Img(src="/assets/logo-essalud-blanco.svg", alt="Essalud", width="110", height="24")
+                ], className="d-none d-lg-flex align-items-center justify-content-end"),
+            ])
+        ]),
+        color="sgd",
+        dark=True,
+        className="navbar-expand-lg bg-sgd mb-3",
+        style={"background": "linear-gradient(90deg, #013B84 0%, #1E9ADA 100%)"}
+    )
+]),
     dbc.Row([
         dbc.Col([
             html.H6("Red", style={'font-size': '14px', 'color': '#606060', 'fontWeight': 'normal', 'fontFamily': 'Calibri'}),
