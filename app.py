@@ -2,7 +2,7 @@ import dash
 from dash import html, dcc
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from sgdredes.data_provider import get_data
 
 # Inicializar el servidor Flask y la aplicación Dash
@@ -75,11 +75,19 @@ def display_page(pathname):
 def sgdredes():
     return render_template('sgdredes.html')
 
-# Ruta para proporcionar datos de prueba a través de la API
-@server.route('/api/data')
+# Definir la ruta de la API en el servidor Flask
+@server.route('/api/data', methods=['GET'])
 def data():
+    data = request.get_json()  # Esto obtiene los datos del cuerpo del POST
+    co_red = data.get('co_red')
+    nu_expediente = data.get('nu_expediente')
+
+    # Validar que los parámetros se proporcionen
+    if not co_red or not nu_expediente:
+        return jsonify({'error': 'Faltan parámetros: co_red y nu_expediente son necesarios.'}), 400
+
     # Utiliza la función get_data() para obtener los datos
-    data = get_data()
+    data = get_data(co_red, nu_expediente)
     return jsonify(data)
 
 # Servidor
