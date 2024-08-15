@@ -4,13 +4,29 @@ import io
 from sqlalchemy import create_engine
 from datetime import datetime
 
-
 def create_csv_export_route(server):
     @server.route('/administrativo/miconsulta')
     def export_csv():
         # Crear la conexión a la base de datos
         engine = create_engine('postgresql://postgres:AKindOfMagic@10.0.1.228:5432/dw_essalud')
+        engine1 = create_engine('postgresql://postgres:AKindOfMagic@10.0.1.228:5432/dl_essi')
         try:
+            with engine1.connect() as conn1:
+                # Ejecutar las consultas y cargar los DataFrames
+                # NO CONSIDERAR POL. COMPL. CRECIENTE SAN NICOLAS
+                query = """
+                        SELECT DISTINCT(c1.cas_cod) FROM cas_pobafil c1 INNER JOIN CMCAS10 c2 on c1.cas_cod = c2.cenasicod  
+                        WHERE c1.cuenta_registros > 0
+                            AND	c2.ESTREGCOD = '1' 
+                            AND c2.NIVCENTASISCOD IN ('1','2') 
+                            AND c2.CENASISISFLG = '1' 
+                            AND c2.ORICENASICOD IN ('1', '2')
+                            AND c2.cenasicod <> '824'
+                        """
+                ipress = pd.read_sql(query, conn1)
+
+            cas_cod_list = ipress['cas_cod'].tolist()
+
             with engine.connect() as conn:
                 # Ejecutar las consultas y cargar los DataFrames
                 query = "SELECT * FROM public.servicios_ipress_total WHERE cod_area = '01'"
@@ -18,6 +34,10 @@ def create_csv_export_route(server):
                 
                 query = "SELECT * FROM public.servicios_ipress"
                 servicios_ipress_miconsulta = pd.read_sql(query, conn)
+
+            # Filtrar ambos DataFrames para mantener sólo los registros cuyo 'cod_centro' está en 'cas_cod'
+            servicios_ipress_total = servicios_ipress_total[servicios_ipress_total['cod_centro'].isin(cas_cod_list)]
+            servicios_ipress_miconsulta = servicios_ipress_miconsulta[servicios_ipress_miconsulta['cod_centro'].isin(cas_cod_list)]
 
             # Comparar los DataFrames y añadir la columna 'habilitado_mi_consulta'
             columnas_comunes = list(servicios_ipress_total.columns)
@@ -56,3 +76,6 @@ def create_csv_export_route(server):
             # Liberar memoria y cerrar la conexión a la base de datos
             del servicios_ipress_total, servicios_ipress_miconsulta
             engine.dispose()
+            
+
+
