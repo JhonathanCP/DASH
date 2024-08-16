@@ -229,7 +229,7 @@ layout = dbc.Container([
                     dash_table.DataTable(
                         id='table-agrupada-red-administracion',
                         columns=[{"name": i, "id": i} for i in [
-                            'RED', 'ACTA PENDIENTE DE REGISTRO', 'ACTA PENDIENTE DE DIGITACIÓN', 'ACTA PENDIENTE DE VERIFICACIÓN', 'TOTAL ACTAS'
+                            'RED', 'ACTA PENDIENTE DE REGISTRO', 'ACTA PENDIENTE DE DIGITACIÓN', 'ACTA PENDIENTE DE VERIFICACIÓN', 'ACTAS PENDIENTES'
                         ]],
                         style_table={
                             'overflowX': 'auto',
@@ -273,7 +273,7 @@ layout = dbc.Container([
                                 'textAlign': 'center'
                             },
                             {
-                                'if': {'column_id': 'TOTAL ACTAS'},
+                                'if': {'column_id': 'ACTAS PENDIENTES'},
                                 'textAlign': 'center'
                             },
                         ],
@@ -335,7 +335,7 @@ def register_callbacks(app):
             'ACTA PENDIENTE DE VERIFICACIÓN': 'sum'
         }).reset_index()
 
-        grouped_df['TOTAL ACTAS'] = grouped_df['ACTA PENDIENTE DE REGISTRO'] + grouped_df['ACTA PENDIENTE DE DIGITACIÓN'] + grouped_df['ACTA PENDIENTE DE VERIFICACIÓN']
+        grouped_df['ACTAS PENDIENTES'] = grouped_df['ACTA PENDIENTE DE REGISTRO'] + grouped_df['ACTA PENDIENTE DE DIGITACIÓN'] + grouped_df['ACTA PENDIENTE DE VERIFICACIÓN']
 
         return RED, Tipo_eleccion, filtered_df.to_dict('records'), grouped_df.to_dict('records')
 
