@@ -114,6 +114,8 @@ def aplicar_condiciones4(row):
         return 'ACTA PENDIENTE DE DIGITACIÓN'
     elif row['c_estado_digtal'] == 2:
         return 'ACTA PENDIENTE DE VERIFICACIÓN'
+    elif row['c_estado_digtal'] == 3:
+        return 'ACTA PENDIENTE DE VERIFICACIÓN'
     else:
         return ""
 

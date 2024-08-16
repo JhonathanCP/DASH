@@ -112,39 +112,38 @@ red_options = get_red_options()
 print(f"Red options: {red_options}")  # Debugging line
 
 layout = dbc.Container([
+    dbc.Container(fluid=True, className="p-0 mx-0", children=[
+        dbc.Navbar(
+            dbc.Container(fluid=True, className="d-flex justify-content-between align-items-center p-0", children=[
+                # Logo SGD Redes
+                dbc.Row([
+                    dbc.Col([
+                        html.Img(src="/assets/logoSGDredes-blanco.png", alt="SGD", className="d-block d-lg-none", style={"width": "60px", "height": "auto"}),
+                        html.Img(src="/assets/logoSGDredes-blanco.png", alt="SGD", className="d-none d-lg-block", style={"width": "120px", "height": "auto"})
+                    ], className="d-flex align-items-center"),
+                ]),
 
-    dbc.Container(fluid=True, className="p-0", children=[
-    dbc.Navbar(
-        dbc.Container(fluid=True, className="d-flex justify-content-between align-items-center p-0", children=[
-            # Logo SGD Redes
-            dbc.Row([
-                dbc.Col([
-                    html.Img(src="/assets/logoSGDredes-blanco.png", alt="SGD", className="d-block d-lg-none", style={"width": "60px", "height": "auto"}),
-                    html.Img(src="/assets/logoSGDredes-blanco.png", alt="SGD", className="d-none d-lg-block", style={"width": "120px", "height": "auto"})
-                ], className="d-flex align-items-center"),
+                # Título Centrado
+                dbc.Row([
+                    dbc.Col([
+                        html.H2("Seguimiento del trámite", className="mb-0 text-white d-none d-lg-block"),
+                        html.H3("Seguimiento del trámite", className="mb-0 text-white d-block d-lg-none", style={"fontSize": "1.25rem"})
+                    ], className="text-center flex-grow-1"),
+                ]),
+
+                # Logo Essalud (Visible solo en pantallas grandes)
+                dbc.Row([
+                    dbc.Col([
+                        html.Img(src="/assets/logo-essalud-blanco.svg", alt="Essalud", width="110", height="24")
+                    ], className="d-none d-lg-flex align-items-center justify-content-end"),
+                ])
             ]),
-
-            # Título Centrado
-            dbc.Row([
-                dbc.Col([
-                    html.H2("Seguimiento del trámite", className="mb-0 text-white d-none d-lg-block"),
-                    html.H3("Seguimiento del trámite", className="mb-0 text-white d-block d-lg-none", style={"fontSize": "1.25rem"})
-                ], className="text-center flex-grow-1"),
-            ]),
-
-            # Logo Essalud (Visible solo en pantallas grandes)
-            dbc.Row([
-                dbc.Col([
-                    html.Img(src="/assets/logo-essalud-blanco.svg", alt="Essalud", width="110", height="24")
-                ], className="d-none d-lg-flex align-items-center justify-content-end"),
-            ])
-        ]),
-        color="sgd",
-        dark=True,
-        className="navbar-expand-lg bg-sgd mb-3",
-        style={"background": "linear-gradient(90deg, #013B84 0%, #1E9ADA 100%)"}
-    )
-]),
+            color="sgd",
+            dark=True,
+            className="navbar-expand-lg bg-sgd mb-3",
+            style={"background": "linear-gradient(90deg, #013B84 0%, #1E9ADA 100%)"}
+        )
+    ]),
     dbc.Row([
         dbc.Col([
             html.H6("Red", style={'font-size': '14px', 'color': '#606060', 'fontWeight': 'normal', 'fontFamily': 'Calibri'}),
@@ -206,12 +205,29 @@ layout = dbc.Container([
             html.H6("Asunto", style={'font-size': '14px', 'color': '#0064AF', 'fontWeight': 'normal', 'fontFamily': 'Calibri', 'textAlign': 'center'}),
             dbc.Card(
                 dbc.CardBody([
-                    html.P(id="asunto", className="card-text", style={'font-size': '16px', 'color': '#606060', 'fontFamily': 'Calibri'}),
+                    html.P("Ingrese la red y su número de expediente", id="asunto", className="card-text", style={'font-size': '16px', 'color': '#606060', 'fontFamily': 'Calibri'}),
                 ]),
                 style={"margin-top": "10px", "padding": "0px", "border": "none", "text-align": "center", 'font-weight': 'bold', 'background-color': '#F4FAFD', 'margin-bottom': '10px'}
             )
         ], width=12)
     ], style={'margin': '0'}, className='px-4'),
+
+    dbc.Row([
+        dbc.Col([
+            html.Div(id='recaptcha-container', children=[
+                html.Div(
+                    id='recaptcha',
+                    children=[
+                        html.Div(
+                            className='g-recaptcha',
+                            id='recaptcha',
+                            **{'data-sitekey': '6LfJ-TkpAAAAAGk-luwLSzw3ihrxMprK85ckCalL'}
+                        )
+                    ]
+                )
+            ])
+        ])
+    ], className='px-4'),
 
     # Tabla de resultados
     dbc.Row([
@@ -226,14 +242,14 @@ layout = dbc.Container([
 def register_callbacks(app):
     @app.callback(
         [Output('table_container', 'children', allow_duplicate=True),
-         Output('razon-social', 'children', allow_duplicate=True),
-         Output('min-fecha', 'children', allow_duplicate=True),
-         Output('tipdoc', 'children', allow_duplicate=True),
-         Output('asunto', 'children', allow_duplicate=True)],
+        Output('razon-social', 'children', allow_duplicate=True),
+        Output('min-fecha', 'children', allow_duplicate=True),
+        Output('tipdoc', 'children', allow_duplicate=True),
+        Output('asunto', 'children', allow_duplicate=True)],
         [Input('search-button', 'n_clicks'), 
-         Input('nu_expediente_input', 'n_submit')],
+        Input('nu_expediente_input', 'n_submit')],
         [State('co_red_dropdown', 'value'),
-         State('nu_expediente_input', 'value')],
+        State('nu_expediente_input', 'value')],
         prevent_initial_call=True,
     )
     def update_table(n_clicks, n_submit, co_red, nu_expediente):
@@ -241,7 +257,6 @@ def register_callbacks(app):
             return "", "", "", "", ""
 
         data = fetch_data(co_red, nu_expediente)
-
         if data is not None and not data.empty:
             last_5_data = data.tail(5)
 
@@ -250,13 +265,12 @@ def register_callbacks(app):
             fecha_envio = first_row['Fecha de envío']
             clase_documento = first_row['Clase de documento']
             asunto = first_row['Asunto']
-
             data_dict = last_5_data.to_dict('records')
 
             table = dash_table.DataTable(
                 id='table',
                 columns=[{"name": i, "id": i} for i in
-                         ['N° Expediente', 'Clase de documento', 'Asunto', 'Fecha de envío', 'Origen', 'Fecha de aceptación', 'Destino', 'Red']],
+                        ['N° Expediente', 'Clase de documento', 'Asunto', 'Fecha de envío', 'Origen', 'Fecha de aceptación', 'Destino', 'Red']],
                 data=data_dict,
                 style_table={
                     'overflowX': 'auto',
@@ -302,11 +316,17 @@ def register_callbacks(app):
         Output("download-csv", "data"),
         Input("download-button", "n_clicks"),
         [State('co_red_dropdown', 'value'),
-         State('nu_expediente_input', 'value')],
+        State('nu_expediente_input', 'value')],
         prevent_initial_call=True,
     )
     def download_csv(n_clicks, co_red, nu_expediente):
         data = fetch_data(co_red, nu_expediente)
         if data is not None and not data.empty:
-            return dcc.send_data_frame(data.to_csv, "datos_tramite.csv")
+            return dcc.send_data_frame(
+                data.to_csv, 
+                "datos_tramite.csv",
+                sep=';',        # Establece el separador como ;
+                quoting=1,      # Usa comillas dobles (opción 1 es para comillas dobles)
+                index=False     # No incluye el índice en el archivo CSV
+            )
         return None
