@@ -180,7 +180,7 @@ layout = dbc.Container([
                 style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white'},
                 className='align-middle'
             ),
-            dcc.Download(id="download-csv")  # Añadimos este componente para la descarga
+            dcc.Download(id="download-csv-redes")  # Añadimos este componente para la descarga
         ], width=12, md=12, lg=2, className='mb-2 mt-4 text-center'),
 
     ], className='px-4'),
@@ -190,22 +190,22 @@ layout = dbc.Container([
         dbc.Col([
             dbc.Card(
                 dbc.CardBody([
-                    html.P(id="razon-social", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
-                    html.P(id="min-fecha", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
-                    html.P(id="tipdoc", className="card-text", style={'font-size': '14px', 'color': '#606060'})
+                    html.P(id="razon-social-redes", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
+                    html.P(id="min-fecha-redes", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
+                    html.P(id="tipdoc-redes", className="card-text", style={'font-size': '14px', 'color': '#606060'})
                 ]),
                 style={"margin-top": "10px", "padding": "0px", "border": "none"}
             )
         ], width=12, md=6, lg=3,)
     ], style={'margin': '0'}, className='px-4'),
 
-    # Tarjeta del asunto
+    # Tarjeta del asunto_redes
     dbc.Row([
         dbc.Col([
             html.H6("Asunto", style={'font-size': '14px', 'color': '#0064AF', 'fontWeight': 'normal', 'fontFamily': 'Calibri', 'textAlign': 'center'}),
             dbc.Card(
                 dbc.CardBody([
-                    html.P("Ingrese la red y su número de expediente", id="asunto", className="card-text", style={'font-size': '16px', 'color': '#606060', 'fontFamily': 'Calibri'}),
+                    html.P("Ingrese la red y su número de expediente", id="asunto_redes", className="card-text", style={'font-size': '16px', 'color': '#606060', 'fontFamily': 'Calibri'}),
                 ]),
                 style={"margin-top": "10px", "padding": "0px", "border": "none", "text-align": "center", 'font-weight': 'bold', 'background-color': '#F4FAFD', 'margin-bottom': '10px'}
             )
@@ -232,7 +232,7 @@ layout = dbc.Container([
     # Tabla de resultados
     dbc.Row([
         dbc.Col([
-            html.Div(id='table_container'),
+            html.Div(id='table_container-redes'),
         ], width=12)
     ], style={'margin-top': '20px'}, className='px-4 pt-0'),
 
@@ -241,11 +241,11 @@ layout = dbc.Container([
 
 def register_callbacks(app):
     @app.callback(
-        [Output('table_container', 'children', allow_duplicate=True),
-        Output('razon-social', 'children', allow_duplicate=True),
-        Output('min-fecha', 'children', allow_duplicate=True),
-        Output('tipdoc', 'children', allow_duplicate=True),
-        Output('asunto', 'children', allow_duplicate=True)],
+        [Output('table_container-redes', 'children', allow_duplicate=True),
+        Output('razon-social-redes', 'children', allow_duplicate=True),
+        Output('min-fecha-redes', 'children', allow_duplicate=True),
+        Output('tipdoc-redes', 'children', allow_duplicate=True),
+        Output('asunto_redes', 'children', allow_duplicate=True)],
         [Input('search-button', 'n_clicks'), 
         Input('nu_expediente_input', 'n_submit')],
         [State('co_red_dropdown', 'value'),
@@ -264,7 +264,7 @@ def register_callbacks(app):
             razon_social = first_row['Razón Social']
             fecha_envio = first_row['Fecha de envío']
             clase_documento = first_row['Clase de documento']
-            asunto = first_row['Asunto']
+            asunto_redes = first_row['Asunto']
             data_dict = last_5_data.to_dict('records')
 
             table = dash_table.DataTable(
@@ -305,15 +305,19 @@ def register_callbacks(app):
                     {'if': {'column_id': 'Fecha de aceptación'}, 'minWidth': '120px', 'width': '120px', 'maxWidth': '150px', 'textAlign': 'center'},
                     {'if': {'column_id': 'Destino'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '150px'},
                     {'if': {'column_id': 'Red'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px'},
-                    {'if': {'column_id': 'Razón Social'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px'}
+                    {'if': {'column_id': 'Razón Social'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px'},
+                        {
+                            'if': {'row_index': 'odd'},
+                            'backgroundColor': 'rgb(244, 250, 253)',
+                        }
                 ],
             )
-            return table, f"Razón social: {razon_social}", f"Fecha de Envío: {fecha_envio}", f"Tipo de documento: {clase_documento}", asunto
+            return table, f"Razón social: {razon_social}", f"Fecha de Envío: {fecha_envio}", f"Tipo de documento: {clase_documento}", asunto_redes
         else:
             return "No se encontró información con los datos proporcionados. Intente nuevamente", "", "", "", ""
 
     @app.callback(
-        Output("download-csv", "data"),
+        Output("download-csv-redes", "data", allow_duplicate=True),
         Input("download-button", "n_clicks"),
         [State('co_red_dropdown', 'value'),
         State('nu_expediente_input', 'value')],
