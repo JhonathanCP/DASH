@@ -89,6 +89,13 @@ def display_page(pathname):
             app.sgdredes_callbacks_registered = True
         return sgd_redes_layout
 
+    elif pathname == '/sgdcentral/seguimiento':
+            from sgdcentral.sgdcentral import layout as sgd_central_layout, register_callbacks as register_callbacks_sgdcentral
+            if not hasattr(app, 'sgdcentral_callbacks_registered'):
+                register_callbacks_sgdcentral(app)
+                app.sgdcentral_callbacks_registered = True
+            return sgd_central_layout
+    
     else:
         return html.Div([
             html.H1("Bienvenido a la aplicación Dash"),
