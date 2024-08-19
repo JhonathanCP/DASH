@@ -132,31 +132,32 @@ layout = dbc.Container([
             dbc.Row([
                 dbc.Col([
                     html.Img(src="/assets/sgd-central.png", alt="SGD", className="d-block d-lg-none", style={"width": "80px", "height": "auto"}),
-                    html.Img(src="/assets/sgd-central.png", alt="SGD", className="d-none d-lg-block", style={"width": "170px", "height": "auto"})
+                    html.Img(src="/assets/sgd-central.png", alt="SGD", className="d-none d-lg-block", style={"width": "180px", "height": "auto"})
                 ], className="d-flex align-items-center"),
             ]),
 
             # Título Centrado
             dbc.Row([
                 dbc.Col([
-                    html.H2("Seguimiento del trámite", className="mb-0 text-#0064AF d-none d-lg-block"),
-                    html.H3("Seguimiento del trámite", className="mb-0 text-#0064AF d-block d-lg-none", style={"fontSize": "1.25rem"})
+                    html.H2("Seguimiento del trámite", className="mb-0 d-none d-lg-block",style={"fontFamily": "Calibri" ,"color": '#0064AF'}),
+                    html.H3("Seguimiento del trámite", className="mb-0 d-block d-lg-none", style={"fontFamily": "Calibri" ,"fontSize": "1.35rem", "color": '#0064AF'})
                 ], className="text-center flex-grow-1"),
             ]),
 
             # Logo Essalud (Visible solo en pantallas grandes)
             dbc.Row([
                 dbc.Col([
-                    html.Img(src="/assets/Logotipo sin Slogan_Horizontal_Color Transparente.png", alt="Essalud", width="110", height="24")
+                    html.Img(src="/assets/Logotipo sin Slogan_Horizontal_Color Transparente.png", alt="Essalud", width="140")
                 ], className="d-none d-lg-flex align-items-center justify-content-end"),
             ])
         ]),
         color="sgd",
         dark=True,
-        className="navbar-expand-lg bg-sgd mb-3",
-        style={"background": "linear-gradient(90deg, #ffffff 0%, #ffffff 50%, #013B84 100%)"}
+        className="navbar-expand-lg bg-sgd",
+        style={"background": "white"},
 
-    )
+    ),
+    html.Div(style={"width": "100%", "height": "5px", "backgroundColor": "#0064AF"})
 ]),
     dbc.Row([
         dbc.Col([
@@ -187,7 +188,7 @@ layout = dbc.Container([
             dcc.Download(id="download-csv")  # Añadimos este componente para la descarga
         ], width=12, md=12, lg=2, className='mb-2 mt-4 text-center'),
 
-    ], className='px-4'),
+    ], className='px-4 pt-3'),
 
     # Tarjetas para los valores de la primera fila
     dbc.Row([
