@@ -131,8 +131,8 @@ layout = dbc.Container([
             # Logo SGD Redes
             dbc.Row([
                 dbc.Col([
-                    html.Img(src="assets/sgd-central.png", alt="SGD", className="d-block d-lg-none", style={"width": "80px", "height": "auto"}),
-                    html.Img(src="assets/sgd-central.png", alt="SGD", className="d-none d-lg-block", style={"width": "170px", "height": "auto"})
+                    html.Img(src="/assets/sgd-central.png", alt="SGD", className="d-block d-lg-none", style={"width": "80px", "height": "auto"}),
+                    html.Img(src="/assets/sgd-central.png", alt="SGD", className="d-none d-lg-block", style={"width": "170px", "height": "auto"})
                 ], className="d-flex align-items-center"),
             ]),
 
@@ -247,14 +247,14 @@ layout = dbc.Container([
 
 def register_callbacks(app):
     @app.callback(
-        [Output('table_container', 'children'),
-        Output('razon-social', 'children'),
-        Output('min-fecha', 'children'),
-        Output('tipdoc', 'children'),
-        Output('asunto', 'children'),
-        Output('asunto_title', 'style'),
-        Output('estado', 'children'),
-        Output('estado_title', 'style')],
+        [Output('table_container', 'children', allow_duplicate=True),
+        Output('razon-social', 'children', allow_duplicate=True),
+        Output('min-fecha', 'children', allow_duplicate=True),
+        Output('tipdoc', 'children', allow_duplicate=True),
+        Output('asunto', 'children', allow_duplicate=True),
+        Output('asunto_title', 'style', allow_duplicate=True),
+        Output('estado', 'children', allow_duplicate=True),
+        Output('estado_title', 'style', allow_duplicate=True)],
         [Input('search-button', 'n_clicks')],
         [State('nu_expediente_input', 'value')],
         prevent_initial_call=True,
@@ -344,7 +344,7 @@ def register_callbacks(app):
             return ["", "", "", "", "Especificar DNI/RUC y hoja de trámite para ver detalle", {'display': 'none'}, "", {'display': 'none'}]  # Ocultar título "Asunto" cuando no hay datos
 
     @app.callback(
-        Output('download-csv', 'data'),
+        Output('download-csv', 'data', allow_duplicate=True),
         [Input('download-button', 'n_clicks')],
         [State('nu_expediente_input', 'value')],
         prevent_initial_call=True
