@@ -2,7 +2,8 @@ from flask import Flask, send_file
 import pandas as pd
 import io
 from sqlalchemy import create_engine
-from datetime import datetime
+from datetime import datetime, timedelta
+import pytz  # Para manejar zonas horarias
 
 def create_csv_export_route(server):
     @server.route('/administrativo/miconsulta')
@@ -17,7 +18,7 @@ def create_csv_export_route(server):
                 query = """
                         SELECT DISTINCT(c1.cas_cod) FROM cas_pobafil c1 INNER JOIN CMCAS10 c2 on c1.cas_cod = c2.cenasicod  
                         WHERE c1.cuenta_registros > 0
-                            AND	c2.ESTREGCOD = '1' 
+                            AND c2.ESTREGCOD = '1' 
                             AND c2.NIVCENTASISCOD IN ('1','2') 
                             AND c2.CENASISISFLG = '1' 
                             AND c2.ORICENASICOD IN ('1', '2')
@@ -46,7 +47,7 @@ def create_csv_export_route(server):
                 axis=1
             )
 
-            # Eliminar la columna de origen (ajustar según la columna específica que desees eliminar)
+            # Eliminar columnas no necesarias
             servicios_ipress_total.drop(columns=['cod_red_asistencial'], inplace=True, errors='ignore')
             servicios_ipress_total.drop(columns=['cod_centro'], inplace=True, errors='ignore')
             servicios_ipress_total.drop(columns=['cod_area'], inplace=True, errors='ignore')
@@ -57,8 +58,20 @@ def create_csv_export_route(server):
             servicios_ipress_total.rename(columns={"centro": "ipress"}, inplace=True)
 
             # Agregar la columna 'fecha_corte' con el formato adecuado (YYYY-MM-DD HH:MM:SS)
-            servicios_ipress_total['fecha_corte'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            servicios_ipress_total.columns = servicios_ipress_total.columns.str.upper()           
+            # Ajustar la hora a GMT-5
+            timezone = pytz.timezone('America/Lima')
+            fecha_corte = datetime.now(timezone).strftime('%Y-%m-%d %H:%M:%S')
+            servicios_ipress_total['fecha_corte'] = fecha_corte
+            servicios_ipress_total.columns = servicios_ipress_total.columns.str.upper()
+
+            # Agregar las columnas de conteo
+            conteos = servicios_ipress_total.groupby('IPRESS')['HABILITADO_MI_CONSULTA'].value_counts().unstack(fill_value=0)
+            conteos.columns = ['SERVICIOS_NO_HABILITADOS', 'SERVICIOS_HABILITADOS']
+            conteos['CANTIDAD_SERVICIOS'] = conteos.sum(axis=1)
+            conteos.reset_index(inplace=True)
+
+            # Fusionar conteos con el DataFrame original
+            servicios_ipress_total = servicios_ipress_total.merge(conteos, left_on='IPRESS', right_on='IPRESS', how='left')
 
             # Convertir el DataFrame a un archivo CSV en memoria
             str_io = io.StringIO()
@@ -76,6 +89,3 @@ def create_csv_export_route(server):
             # Liberar memoria y cerrar la conexión a la base de datos
             del servicios_ipress_total, servicios_ipress_miconsulta
             engine.dispose()
-            
-
-
