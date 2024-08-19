@@ -194,7 +194,7 @@ layout = dbc.Container([
         dbc.Col([
             dbc.Card(
                 dbc.CardBody([
-                    html.P(id="razon-social", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
+                    html.P(id="razon-social-central", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
                     html.P(id="min-fecha", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
                     html.P(id="tipdoc", className="card-text", style={'font-size': '14px', 'color': '#606060'})
                 ]),
@@ -239,7 +239,7 @@ layout = dbc.Container([
     # Tabla de resultados
     dbc.Row([
         dbc.Col([
-            html.Div(id='table_container'),
+            html.Div(id='table_container-central'),
         ], width=12)
     ], style={'margin-top': '20px'}, className='px-4 pt-0'),
 
@@ -247,20 +247,20 @@ layout = dbc.Container([
 
 def register_callbacks(app):
     @app.callback(
-        [Output('table_container', 'children', allow_duplicate=True),
-        Output('razon-social', 'children', allow_duplicate=True),
+        [Output('table_container-central', 'children', allow_duplicate=True),
+        Output('razon-social-central', 'children', allow_duplicate=True),
         Output('min-fecha', 'children', allow_duplicate=True),
         Output('tipdoc', 'children', allow_duplicate=True),
         Output('asunto', 'children', allow_duplicate=True),
         Output('asunto_title', 'style', allow_duplicate=True),
         Output('estado', 'children', allow_duplicate=True),
         Output('estado_title', 'style', allow_duplicate=True)],
-        [Input('search-button', 'n_clicks')],
+        [Input('search-button', 'n_clicks'), Input('nu_expediente_input', 'n_submit')],
         [State('nu_expediente_input', 'value')],
         prevent_initial_call=True,
     )
-    def update_table(n_clicks, nu_expediente):
-        if n_clicks is None or n_clicks == 0:
+    def update_table(n_clicks,n_submit, nu_expediente):
+        if (n_clicks is None or n_clicks == 0) and (n_submit is None or n_submit == 0):
             return ["", "", "", "", "Especificar DNI/RUC y hoja de trámite para ver detalle", {'display': 'none'}, "", {'display': 'none'}]
         
         if nu_expediente:
@@ -334,7 +334,11 @@ def register_callbacks(app):
                         {'if': {'column_id': 'Fecha de aceptación'}, 'minWidth': '120px', 'width': '120px', 'maxWidth': '150px', 'textAlign': 'center'},
                         {'if': {'column_id': 'Destino'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '150px'},
                         {'if': {'column_id': 'Razón Social'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px'},
-                        {'if': {'column_id': 'Acción'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px'}
+                        {'if': {'column_id': 'Acción'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px'},
+                        {
+                            'if': {'row_index': 'odd'},
+                            'backgroundColor': 'rgb(244, 250, 253)',
+                        }
                     ],
                 )
                 return table, f"Razón social: {razon_social}", f"Fecha de envío: {fecha_envio}", f"Tipo de documento {clase_documento}", f"{asunto}", {'color': '#0064AF', 'display': 'block', 'textAlign': 'center', 'fontFamily': 'Calibri'}, estado, {'display': 'block','color': '#0064AF', 'textAlign': 'center', 'fontFamily': 'Calibri'}  # Mostrar título "Asunto"
