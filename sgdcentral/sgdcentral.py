@@ -139,22 +139,22 @@ layout = dbc.Container([
             # Título Centrado
             dbc.Row([
                 dbc.Col([
-                    html.H2("Seguimiento del trámite", className="mb-0 text-white d-none d-lg-block"),
-                    html.H3("Seguimiento del trámite", className="mb-0 text-white d-block d-lg-none", style={"fontSize": "1.25rem"})
+                    html.H2("Seguimiento del trámite", className="mb-0 text-#0064AF d-none d-lg-block"),
+                    html.H3("Seguimiento del trámite", className="mb-0 text-#0064AF d-block d-lg-none", style={"fontSize": "1.25rem"})
                 ], className="text-center flex-grow-1"),
             ]),
 
             # Logo Essalud (Visible solo en pantallas grandes)
             dbc.Row([
                 dbc.Col([
-                    html.Img(src="/assets/logo-essalud-blanco.svg", alt="Essalud", width="110", height="24")
+                    html.Img(src="/assets/Logotipo sin Slogan_Horizontal_Color Transparente.png", alt="Essalud", width="110", height="24")
                 ], className="d-none d-lg-flex align-items-center justify-content-end"),
             ])
         ]),
         color="sgd",
         dark=True,
         className="navbar-expand-lg bg-sgd mb-3",
-        style={"background": "linear-gradient(90deg, #ffffff 0%, #1E9ADA 50%, #013B84 100%)"}
+        style={"background": "linear-gradient(90deg, #ffffff 0%, #ffffff 50%, #013B84 100%)"}
 
     )
 ]),
