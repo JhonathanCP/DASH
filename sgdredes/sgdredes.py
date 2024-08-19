@@ -126,8 +126,8 @@ layout = dbc.Container([
                 # Título Centrado
                 dbc.Row([
                     dbc.Col([
-                        html.H2("Seguimiento del trámite", className="mb-0 text-white d-none d-lg-block"),
-                        html.H3("Seguimiento del trámite", className="mb-0 text-white d-block d-lg-none", style={"fontSize": "1.25rem"})
+                        html.H2("Seguimiento del trámite", className="mb-0 text-white d-none d-lg-block", style={'fontWeight': 'bold',}),
+                        html.H3("Seguimiento del trámite", className="mb-0 text-white d-block d-lg-none", style={"fontSize": "1.25rem", 'fontWeight': 'bold'})
                     ], className="text-center flex-grow-1"),
                 ]),
 
@@ -274,7 +274,7 @@ def register_callbacks(app):
                 data=data_dict,
                 style_table={
                     'overflowX': 'auto',
-                    'border': 'thin lightgrey solid',
+                    'border': 'none',
                     'fontFamily': 'Calibri',
                     'fontSize': '12px',
                     'width': '100%',
@@ -293,9 +293,11 @@ def register_callbacks(app):
                     'backgroundColor': '#0064AF',
                     'color': 'white',
                     'fontWeight': 'bold',
-                    'textAlign': 'center'
+                    'textAlign': 'center',
+                    'border': '1px solid white'
                 },
                 fixed_rows={'headers': True},
+                style_data={ 'border': '1px solid white' },
                 style_cell_conditional=[
                     {'if': {'column_id': 'N° Expediente'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '150px', 'textAlign': 'center'},
                     {'if': {'column_id': 'Clase de documento'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '200px', 'textAlign': 'center'},

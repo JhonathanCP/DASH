@@ -139,8 +139,8 @@ layout = dbc.Container([
             # Título Centrado
             dbc.Row([
                 dbc.Col([
-                    html.H2("Seguimiento del trámite", className="mb-0 d-none d-lg-block",style={"fontFamily": "Calibri" ,"color": '#0064AF'}),
-                    html.H3("Seguimiento del trámite", className="mb-0 d-block d-lg-none", style={"fontFamily": "Calibri" ,"fontSize": "1.35rem", "color": '#0064AF'})
+                    html.H2("Seguimiento del trámite", className="mb-0 d-none d-lg-block",style={"fontWeight": "bold", "fontFamily": "Calibri" ,"color": '#0064AF'}),
+                    html.H3("Seguimiento del trámite", className="mb-0 d-block d-lg-none", style={"fontWeight": "bold", "fontFamily": "Calibri" ,"fontSize": "1.35rem", "color": '#0064AF'})
                 ], className="text-center flex-grow-1"),
             ]),
 
@@ -209,7 +209,7 @@ layout = dbc.Container([
             dbc.Card(
                 dbc.CardBody([
                     html.H6("Estado documento", id="estado_title", style={'font-size': '14px', 'color': 'white', 'fontWeight': 'normal', 'fontFamily': 'Calibri', "textAlign": 'center'}),
-                    html.P(id="estado", className="card-text", style={'font-size': '18px', 'color': '#666666',"textAlign":'center'}),
+                    html.P(id="estado", className="card-text", style={'font-size': '18px', 'color': '#666666',"textAlign":'center', "fontWeight": "bold"}),
 
                 ]),
                 style={"margin-top": "10px", "padding": "0px", "border": "none"}, className="offset-md-4"
@@ -304,7 +304,7 @@ def register_callbacks(app):
                     data=last_5_data.to_dict('records'),
                     style_table={
                         'overflowX': 'auto',
-                        'border': 'thin lightgrey solid',
+                        'border': 'none',
                         'fontFamily': 'Calibri',
                         'fontSize': '12px',
                         'width': '100%',
@@ -323,8 +323,10 @@ def register_callbacks(app):
                         'backgroundColor': '#0064AF',
                         'color': 'white',
                         'fontWeight': 'bold',
-                        'textAlign': 'center'
+                        'textAlign': 'center',
+                        'border': '1px solid white'
                     },
+                    style_data={ 'border': '1px solid white' },
                     fixed_rows={'headers': True},
                     style_cell_conditional=[
                         {'if': {'column_id': 'Hoja de trámite'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '150px', 'textAlign': 'center'},
