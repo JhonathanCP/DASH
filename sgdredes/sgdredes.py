@@ -212,22 +212,22 @@ layout = dbc.Container([
         ], width=12)
     ], style={'margin': '0'}, className='px-4'),
 
-    dbc.Row([
-        dbc.Col([
-            html.Div(id='recaptcha-container', children=[
-                html.Div(
-                    id='recaptcha',
-                    children=[
-                        html.Div(
-                            className='g-recaptcha',
-                            id='recaptcha',
-                            **{'data-sitekey': '6LfJ-TkpAAAAAGk-luwLSzw3ihrxMprK85ckCalL'}
-                        )
-                    ]
-                )
-            ])
-        ])
-    ], className='px-4'),
+    # dbc.Row([
+    #     dbc.Col([
+    #         html.Div(id='recaptcha-container', children=[
+    #             html.Div(
+    #                 id='recaptcha',
+    #                 children=[
+    #                     html.Div(
+    #                         className='g-recaptcha',
+    #                         id='recaptcha',
+    #                         **{'data-sitekey': '6LfJ-TkpAAAAAGk-luwLSzw3ihrxMprK85ckCalL'}
+    #                     )
+    #                 ]
+    #             )
+    #         ])
+    #     ])
+    # ], className='px-4'),
 
     # Tabla de resultados
     dbc.Row([

@@ -8,24 +8,25 @@ from flask import Flask, render_template, jsonify, request
 # Inicializar el servidor Flask y la aplicación Dash
 server = Flask(__name__)
 app = dash.Dash(__name__, suppress_callback_exceptions=True, 
-                index_string='''
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    {%metas%}
-                    {%css%}
-                    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-                </head>
-                <body>
-                    {%app_entry%}
-                    <footer>
-                        {%config%}
-                        {%scripts%}
-                        {%renderer%}
-                    </footer>
-                </body>
-                </html>
-                ''',server=server, external_stylesheets=[dbc.themes.BOOTSTRAP,
+                # index_string='''
+                # <!DOCTYPE html>
+                # <html>
+                # <head>
+                #     {%metas%}
+                #     {%css%}
+                #     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                # </head>
+                # <body>
+                #     {%app_entry%}
+                #     <footer>
+                #         {%config%}
+                #         {%scripts%}
+                #         {%renderer%}
+                #     </footer>
+                # </body>
+                # </html>
+                # ''',
+                server=server, external_stylesheets=[dbc.themes.BOOTSTRAP,
     'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css',  # Bootstrap CSS
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css']
 )
