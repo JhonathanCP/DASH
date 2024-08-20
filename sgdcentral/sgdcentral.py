@@ -202,7 +202,7 @@ layout = dbc.Container([
                 style={"margin-top": "10px", "padding": "0px", "border": "none"}
             ),
 
-        ], width=8, md=6, lg=7,),
+        ], width=12, md=6, lg=7,),
 
 
         dbc.Col([
@@ -214,7 +214,7 @@ layout = dbc.Container([
                 ]),
                 style={"margin-top": "10px", "padding": "0px", "border": "none"}, className="offset-md-4"
             ),
-        ], width=2, md=4, lg=4,)
+        ], width=12, md=6, lg=4,)
 
     ], style={'margin': '0'}, className='px-4'),
 
