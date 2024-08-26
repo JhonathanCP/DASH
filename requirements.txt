@@ -10,3 +10,5 @@ jupyter_dash
 pdfkit
 reportlab
 pyodbc == 4.0.34
+pycrypto
+pycryptodome
