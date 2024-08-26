@@ -73,7 +73,7 @@ def display_page(pathname, search):
         return administracion_layout
     
     elif pathname == '/sgdredes/seguimiento':
-        from sgdredes.test import layout as sgd_redes_layout, register_callbacks as register_callbacks_sgdredes
+        from sgdredes.sgdredesconsulta import layout as sgd_redes_layout, register_callbacks as register_callbacks_sgdredes
         if not hasattr(app, 'sgdredes_callbacks_registered'):
             register_callbacks_sgdredes(app)
             app.sgdredes_callbacks_registered = True

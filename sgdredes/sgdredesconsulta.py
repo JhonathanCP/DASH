@@ -69,7 +69,7 @@ def fetch_data(co_red, nu_expediente):
                     rhtm_dependencia_or.de_dependencia AS ORIGEN,
                     TO_CHAR(tdtv_destinos.fe_rec_doc, 'DD/MM/YY HH24:MI') AS FECHA_ACEPTACION,
                     rhtm_dependencia_dest.de_dependencia AS DESTINO,
-                    si_redes.co_red                   
+                    si_redes.des_red                   
                 FROM 
                     idosgd.tdtv_destinos 
                 LEFT JOIN idosgd.rhtm_dependencia rhtm_dependencia_dest 
@@ -177,14 +177,30 @@ def layout(codigo=None):
                 dbc.Card(
                     dbc.CardBody([
                         html.P(f"Red: {red}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
-                        html.P(f"Expediente: {expediente}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
+                        html.P(f"Num. Expediente: {expediente}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
+                    ]),
+                    style={"margin-top": "7px", "padding": "0px", "border": "none"}
+                )
+            ], width=12, md=6, lg=5),
+            dbc.Col([
+                dbc.Card(
+                    dbc.CardBody([
                         html.P(f"Razón Social: {razon_social}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
                         html.P(f"Fecha de Envío: {fecha_envio}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
                         html.P(f"Clase de Documento: {clase_documento}", className="card-text", style={'font-size': '14px', 'color': '#606060'})
                     ]),
-                    style={"margin-top": "10px", "padding": "0px", "border": "none"}
+                    style={"margin-top": "7px", "padding": "0px", "border": "none"}
                 )
-            ], width=12, md=6, lg=3,)
+            ], width=12, md=6, lg=5),
+            dbc.Col([
+                dbc.Button(
+                    [html.I(className="fas fa-file-excel"), html.Span(" Descargar datos")],
+                    id='download-button',
+                    style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white'},
+                    className='align-middle'
+            ),
+            dcc.Download(id="download-csv-redes")  # Añadimos este componente para la descarga
+        ], width=12, md=12, lg=2, className='mb-2 mt-4 text-center')
         ], style={'margin': '0'}, className='px-4'),
 
         # Tarjeta del asunto_redes
@@ -252,17 +268,6 @@ def layout(codigo=None):
                 ),
             ], width=12)
         ], style={'margin-top': '20px'}, className='px-4 pt-0'),
-
-        dbc.Row([dbc.Col([
-            dbc.Button(
-                [html.I(className="fas fa-file-excel"), html.Span(" Descargar datos")],
-                id='download-button',
-                style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white'},
-                className='align-middle'
-            ),
-            dcc.Download(id="download-csv-redes")  # Añadimos este componente para la descarga
-        ], width=12, md=12, lg=2, className='mb-2 mt-4 text-center'),]),
-
     ], fluid=True, className='p-0 m-0')
 
 def register_callbacks(app):
