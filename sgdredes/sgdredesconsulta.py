@@ -9,6 +9,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 import base64
 from urllib.parse import parse_qs
+import csv
 
 # Configuración de cifrado
 clave = b'ESSALUDSGD2024$$'
@@ -289,7 +290,13 @@ def register_callbacks(app):
 
         # Verifica si se obtuvo algún dato
         if data is not None and not data.empty:
-            return dcc.send_data_frame(data.to_csv, "resultados.csv", index=False)
+            return dcc.send_data_frame(
+                data.to_csv,
+                "resultados.csv",
+                sep=';',          # Establece el separador como punto y coma
+                index=False,      # No incluye el índice en el archivo CSV
+                quoting=csv.QUOTE_ALL,  # Sin delimitadores alrededor de los campos
+                escapechar=''     # Asegura que no haya caracteres de escape
+            )
         
         return None
-    
