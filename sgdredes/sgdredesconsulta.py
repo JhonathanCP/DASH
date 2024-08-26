@@ -140,138 +140,137 @@ def layout(codigo=None):
     # data_dict = last_5_data.to_dict('records')
 
     return dbc.Container([
-        dcc.Store(id='store-co-red', data=co_red),
-        dcc.Store(id='store-nu-expediente', data=nu_expediente),
-        dbc.Container(fluid=True, className="p-0 mx-0", children=[
-            dbc.Navbar(
-                dbc.Container(fluid=True, className="d-flex justify-content-between align-items-center p-0", children=[
-                    # Logo SGD Redes
-                    dbc.Row([
-                        dbc.Col([
-                            html.Img(src="/assets/logoSGDredes-blanco.png", alt="SGD", className="d-block d-lg-none", style={"width": "60px", "height": "auto"}),
-                            html.Img(src="/assets/logoSGDredes-blanco.png", alt="SGD", className="d-none d-lg-block", style={"width": "120px", "height": "auto"})
-                        ], className="d-flex align-items-center"),
-                    ]),
-
-                    # Título Centrado
-                    dbc.Row([
-                        dbc.Col([
-                            html.H2("Seguimiento del trámite", className="mb-0 text-white d-none d-lg-block", style={'fontWeight': 'bold'}),
-                            html.H3("Seguimiento del trámite", className="mb-0 text-white d-block d-lg-none", style={"fontSize": "1.25rem", 'fontWeight': 'bold'})
-                        ], className="text-center flex-grow-1"),
-                    ]),
-
-                    # Logo Essalud (Visible solo en pantallas grandes)
-                    dbc.Row([
-                        dbc.Col([
-                            html.Img(src="/assets/logo-essalud-blanco.svg", alt="Essalud", width="110", height="24")
-                        ], className="d-none d-lg-flex align-items-center justify-content-end"),
-                    ])
+    dbc.Container(fluid=True, className="p-0 m-0", children=[
+        dbc.Navbar(
+            dbc.Container(fluid=True, className="d-flex justify-content-between align-items-center p-0", children=[
+                # Logo SGD Redes
+                dbc.Row([
+                    dbc.Col([
+                        html.Img(src="/assets/logoSGDredes-blanco.png", alt="SGD", className="d-block d-lg-none", style={"width": "60px", "height": "auto"}),
+                        html.Img(src="/assets/logoSGDredes-blanco.png", alt="SGD", className="d-none d-lg-block", style={"width": "120px", "height": "auto"})
+                    ], className="d-flex align-items-center"),
                 ]),
-                color="sgd",
-                dark=True,
-                className="navbar-expand-lg bg-sgd mb-3",
-                style={"background": "linear-gradient(90deg, #013B84 0%, #1E9ADA 100%)"}
+
+                # Título Centrado
+                dbc.Row([
+                    dbc.Col([
+                        html.H2("Seguimiento del trámite", className="mb-0 text-white d-none d-lg-block", style={'fontWeight': 'bold'}),
+                        html.H3("Seguimiento del trámite", className="mb-0 text-white d-block d-lg-none", style={"fontSize": "1.25rem", 'fontWeight': 'bold'})
+                    ], className="text-center flex-grow-1"),
+                ]),
+
+                # Logo Essalud (Visible solo en pantallas grandes)
+                dbc.Row([
+                    dbc.Col([
+                        html.Img(src="/assets/logo-essalud-blanco.svg", alt="Essalud", width="110", height="24")
+                    ], className="d-none d-lg-flex align-items-center justify-content-end"),
+                ])
+            ]),
+            color="sgd",
+            dark=True,
+            className="navbar-expand-lg bg-sgd mb-3",
+            style={"background": "linear-gradient(90deg, #013B84 0%, #1E9ADA 100%)"}
+        )
+    ]),
+    # Tarjetas para los valores de la primera fila
+    dbc.Row([
+        dbc.Col([
+            dbc.Card(
+                dbc.CardBody([
+                    html.P(f"Red: {red}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
+                    html.P(f"Num. Expediente: {expediente}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
+                ]),
+                style={"margin-top": "7px", "padding": "0px", "border": "none"}
             )
-        ]),
-        # Tarjetas para los valores de la primera fila
-        dbc.Row([
-            dbc.Col([
-                dbc.Card(
-                    dbc.CardBody([
-                        html.P(f"Red: {red}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
-                        html.P(f"Num. Expediente: {expediente}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
-                    ]),
-                    style={"margin-top": "7px", "padding": "0px", "border": "none"}
-                )
-            ], width=12, md=6, lg=5),
-            dbc.Col([
-                dbc.Card(
-                    dbc.CardBody([
-                        html.P(f"Razón Social: {razon_social}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
-                        html.P(f"Fecha de Envío: {fecha_envio}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
-                        html.P(f"Clase de Documento: {clase_documento}", className="card-text", style={'font-size': '14px', 'color': '#606060'})
-                    ]),
-                    style={"margin-top": "7px", "padding": "0px", "border": "none"}
-                )
-            ], width=12, md=6, lg=5),
-             dbc.Col([
-                        dbc.Button(
-                            [html.I(className="fas fa-file-excel"), html.Span(" Descargar datos")],
-                            id='download-button',
-                            style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white'},
-                            className='align-middle'
-                        ),
-                        dcc.Download(id="download-csv-redes")
-                    ], width=12, md=12, lg=2, className='mb-2 mt-4 text-center')
-                ], style={'margin': '0'}, className='px-4'),
+        ], width=12, md=6, lg=5),
+        dbc.Col([
+            dbc.Card(
+                dbc.CardBody([
+                    html.P(f"Razón Social: {razon_social}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
+                    html.P(f"Fecha de Envío: {fecha_envio}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
+                    html.P(f"Clase de Documento: {clase_documento}", className="card-text", style={'font-size': '14px', 'color': '#606060'})
+                ]),
+                style={"margin-top": "7px", "padding": "0px", "border": "none"}
+            )
+        ], width=12, md=6, lg=5),
+         dbc.Col([
+                    dbc.Button(
+                        [html.I(className="fas fa-file-excel"), html.Span(" Descargar datos")],
+                        id='download-button',
+                        style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white'},
+                        className='align-middle'
+                    ),
+                    dcc.Download(id="download-csv-redes")
+                ], width=12, md=12, lg=2, className='mb-2 mt-4 text-center')
+            ], style={'margin': '0', 'width': '100%'}, className='px-4'),
 
-        # Tarjeta del asunto_redes
-        dbc.Row([
-            dbc.Col([
-                html.H6("Asunto", style={'font-size': '14px', 'color': '#0064AF', 'fontWeight': 'normal', 'fontFamily': 'Calibri', 'textAlign': 'center'}),
-                dbc.Card(
-                    dbc.CardBody([
-                        html.P(asunto_redes, id="asunto_redes", className="card-text", style={'font-size': '16px', 'color': '#606060', 'fontFamily': 'Calibri'}),
-                    ]),
-                    style={"margin-top": "10px", "padding": "0px", "border": "none", "text-align": "center", 'font-weight': 'bold', 'background-color': '#F4FAFD', 'margin-bottom': '10px'}
-                )
-            ], width=12)
-        ], style={'margin': '0'}, className='px-4'),
+    # Tarjeta del asunto_redes
+    dbc.Row([
+        dbc.Col([
+            html.H6("Asunto", style={'font-size': '14px', 'color': '#0064AF', 'fontWeight': 'normal', 'fontFamily': 'Calibri', 'textAlign': 'center'}),
+            dbc.Card(
+                dbc.CardBody([
+                    html.P(asunto_redes, id="asunto_redes", className="card-text", style={'font-size': '16px', 'color': '#606060', 'fontFamily': 'Calibri'}),
+                ]),
+                style={"margin-top": "10px", "padding": "0px", "border": "none", "text-align": "center", 'font-weight': 'bold', 'background-color': '#F4FAFD', 'margin-bottom': '10px'}
+            )
+        ], width=12)
+    ], style={'margin': '0', 'width': '100%'}, className='px-4'),
 
-        # Tabla de resultados
-        dbc.Row([
-            dbc.Col([
-                dash_table.DataTable(
-                    data=data.to_dict('records'),
-                    id='table',
-                    columns=[{"name": i, "id": i} for i in
-                            ['N° Expediente', 'Clase de documento', 'Asunto', 'Fecha de envío', 'Origen', 'Fecha de aceptación', 'Destino', 'Red']],
-                    style_table={
-                        'overflowX': 'auto',
-                        'border': 'none',
-                        'fontFamily': 'Calibri',
-                        'fontSize': '12px',
-                        'width': '100%',
-                        'height': '100%'
-                    },
-                    style_cell={
-                        'fontFamily': 'Calibri',
-                        'height': 'auto',
-                        'maxWidth': '120px',
-                        'whiteSpace': 'normal',
-                        'color': '#606060',
-                        'fontSize': '14px',
-                        'textAlign': 'left'
-                    },
-                    style_header={
-                        'backgroundColor': '#0064AF',
-                        'color': 'white',
-                        'fontWeight': 'bold',
-                        'textAlign': 'center',
-                        'border': '1px solid white'
-                    },
-                    fixed_rows={'headers': True},
-                    style_data={ 'border': '1px solid white' },
-                    style_cell_conditional=[
-                        {'if': {'column_id': 'N° Expediente'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '150px', 'textAlign': 'center'},
-                        {'if': {'column_id': 'Clase de documento'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '200px', 'textAlign': 'center'},
-                        {'if': {'column_id': 'Asunto'}, 'minWidth': '230px', 'width': '230px', 'maxWidth': '250px'},
-                        {'if': {'column_id': 'Fecha de envío'}, 'minWidth': '120px', 'width': '120px', 'maxWidth': '150px', 'textAlign': 'center'},
-                        {'if': {'column_id': 'Origen'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '150px'},
-                        {'if': {'column_id': 'Fecha de aceptación'}, 'minWidth': '120px', 'width': '120px', 'maxWidth': '150px', 'textAlign': 'center'},
-                        {'if': {'column_id': 'Destino'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '150px'},
-                        {'if': {'column_id': 'Red'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px'},
-                        {'if': {'column_id': 'Razón Social'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px'},
-                        {
-                            'if': {'row_index': 'odd'},
-                            'backgroundColor': 'rgb(244, 250, 253)',
-                        }
-                    ],
-                ),
-            ], width=12)
-        ], style={'margin-top': '20px'}, className='px-4 pt-0'),
-    ], fluid=True, className='p-0 m-0')
+    # Tabla de resultados
+    dbc.Row([
+        dbc.Col([
+            dash_table.DataTable(
+                data=data.to_dict('records'),
+                id='table',
+                columns=[{"name": i, "id": i} for i in
+                        ['N° Expediente', 'Clase de documento', 'Asunto', 'Fecha de envío', 'Origen', 'Fecha de aceptación', 'Destino', 'Red']],
+                style_table={
+                    'overflowX': 'auto',
+                    'border': 'none',
+                    'fontFamily': 'Calibri',
+                    'fontSize': '12px',
+                    'width': '100%',
+                    'height': '100%'
+                },
+                style_cell={
+                    'fontFamily': 'Calibri',
+                    'height': 'auto',
+                    'maxWidth': '120px',
+                    'whiteSpace': 'normal',
+                    'color': '#606060',
+                    'fontSize': '14px',
+                    'textAlign': 'left'
+                },
+                style_header={
+                    'backgroundColor': '#0064AF',
+                    'color': 'white',
+                    'fontWeight': 'bold',
+                    'textAlign': 'center',
+                    'border': '1px solid white'
+                },
+                fixed_rows={'headers': True},
+                style_data={ 'border': '1px solid white' },
+                style_cell_conditional=[
+                    {'if': {'column_id': 'N° Expediente'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '150px', 'textAlign': 'center'},
+                    {'if': {'column_id': 'Clase de documento'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '200px', 'textAlign': 'center'},
+                    {'if': {'column_id': 'Asunto'}, 'minWidth': '230px', 'width': '230px', 'maxWidth': '250px'},
+                    {'if': {'column_id': 'Fecha de envío'}, 'minWidth': '120px', 'width': '120px', 'maxWidth': '150px', 'textAlign': 'center'},
+                    {'if': {'column_id': 'Origen'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '150px'},
+                    {'if': {'column_id': 'Fecha de aceptación'}, 'minWidth': '120px', 'width': '120px', 'maxWidth': '150px', 'textAlign': 'center'},
+                    {'if': {'column_id': 'Destino'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '150px'},
+                    {'if': {'column_id': 'Red'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px'},
+                    {'if': {'column_id': 'Razón Social'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px'},
+                    {
+                        'if': {'row_index': 'odd'},
+                        'backgroundColor': 'rgb(244, 250, 253)',
+                    }
+                ],
+            ),
+        ], width=12)
+    ], style={'margin-top': '20px', 'width': '100%'}, className='px-4 pt-0'),
+], fluid=True, className='p-0 m-0')
+
 
 def register_callbacks(app):
     @app.callback(
