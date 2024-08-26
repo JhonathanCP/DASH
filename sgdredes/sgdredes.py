@@ -5,6 +5,31 @@ import pandas as pd
 from sqlalchemy import create_engine
 from dash import dash_table
 import io
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import unpad
+import base64
+
+# Configuración de cifrado
+clave = b'ESSALUDSGD2024$$'
+iv = b'ESSALUDSGD2024$$'  # El IV debe ser de 16 bytes
+
+def descifrar_codigo(codigo_cifrado):
+    try:
+        # Decodificar el código cifrado de Base64
+        codigo_cifrado_bytes = base64.b64decode(codigo_cifrado)
+
+        # Crear el cifrador AES
+        cipher = AES.new(clave, AES.MODE_CBC, iv)
+
+        # Desencriptar los datos
+        datos_descifrados = unpad(cipher.decrypt(codigo_cifrado_bytes), AES.block_size)
+        texto_descifrado = datos_descifrados.decode('utf-8')
+        print("Texto descifrado:", texto_descifrado)
+        return texto_descifrado
+    except (ValueError, KeyError) as e:
+        print("Error al descifrar:", e)
+        return None
+    
 # Función para crear una conexión a la base de datos
 def create_connection():
     try:
@@ -22,9 +47,9 @@ def get_red_options():
     if engine is not None:
         try:
             with engine.connect() as conn:
-                query = "SELECT des_red FROM idosgd.si_redes"
+                query = "SELECT co_red FROM idosgd.si_redes"
                 df = pd.read_sql(query, conn)
-                options = [{'label': row['des_red'], 'value': row['des_red']} for _, row in df.iterrows()]
+                options = [{'label': row['co_red'], 'value': row['co_red']} for _, row in df.iterrows()]
                 return options
         except Exception as e:
             print(f"Failed to fetch red options: {e}")
@@ -33,7 +58,7 @@ def get_red_options():
         return []
 
 # Función para obtener los datos según el filtro
-def fetch_data(des_red, nu_expediente):
+def fetch_data(co_red, nu_expediente):
     engine = create_connection()
     if engine is not None:
         try:
@@ -54,7 +79,7 @@ def fetch_data(des_red, nu_expediente):
                     rhtm_dependencia_or.de_dependencia AS ORIGEN,
                     TO_CHAR(tdtv_destinos.fe_rec_doc, 'DD/MM/YY HH24:MI') AS FECHA_ACEPTACION,
                     rhtm_dependencia_dest.de_dependencia AS DESTINO,
-                    si_redes.des_red                   
+                    si_redes.co_red                   
                 FROM 
                     idosgd.tdtv_destinos 
                 LEFT JOIN idosgd.rhtm_dependencia rhtm_dependencia_dest 
@@ -79,7 +104,7 @@ def fetch_data(des_red, nu_expediente):
                     ON tdtv_remitos.co_dep_emi = rhtm_dependencia_or.co_dependencia
                 WHERE 
                     tdtc_expediente.co_gru = '3'
-                    AND si_redes.des_red = '{des_red}'
+                    AND si_redes.co_red = '{co_red}'
                     AND tdtc_expediente.nu_expediente = '{nu_expediente}'                
                 ORDER BY 
                     FECHA_ENVIO ASC
@@ -111,7 +136,9 @@ def fetch_data(des_red, nu_expediente):
 red_options = get_red_options()
 print(f"Red options: {red_options}")  # Debugging line
 
-layout = dbc.Container([
+# Definir el layout como función
+def layout(codigo=None):
+    return dbc.Container([
     dbc.Container(fluid=True, className="p-0 mx-0", children=[
         dbc.Navbar(
             dbc.Container(fluid=True, className="d-flex justify-content-between align-items-center p-0", children=[
@@ -252,14 +279,25 @@ def register_callbacks(app):
         State('nu_expediente_input', 'value')],
         prevent_initial_call=True,
     )
-    def update_table(n_clicks, n_submit, co_red, nu_expediente):
-        if (n_clicks is None or n_clicks == 0) and (n_submit is None or n_submit == 0):
-            return "", "", "", "", ""
+    def update_table(n_clicks, n_submit, codigo):
+        if codigo:
+            texto_descifrado = descifrar_codigo(codigo)
+            if texto_descifrado:
+                co_red = texto_descifrado[:4]
+                nu_expediente = texto_descifrado[5:]
+                print(f"Decoded co_red: {co_red}, nu_expediente: {nu_expediente}")
+            else:
+                return "", "", "", "", "No se encontró información con los datos proporcionados. Intente nuevamente."
+        else:
+            # Obtener los valores de los inputs
+            co_red = dash.callback_context.inputs.get('co_red_dropdown.value', None)
+            nu_expediente = dash.callback_context.inputs.get('nu_expediente_input.value', None)
+            if not co_red or not nu_expediente:
+                return "Faltan parámetros: co_red y nu_expediente son necesarios.", "", "", "", ""
 
         data = fetch_data(co_red, nu_expediente)
         if data is not None and not data.empty:
             last_5_data = data.tail(5)
-
             first_row = data.iloc[0]
             razon_social = first_row['Razón Social']
             fecha_envio = first_row['Fecha de envío']
@@ -316,7 +354,7 @@ def register_callbacks(app):
             )
             return table, f"Razón social: {razon_social}", f"Fecha de Envío: {fecha_envio}", f"Tipo de documento: {clase_documento}", asunto_redes
         else:
-            return "No se encontró información con los datos proporcionados. Intente nuevamente", "", "", "", ""
+            return "No se encontró información con los datos proporcionados. Intente nuevamente.", "", "", "", ""
 
     @app.callback(
         Output("download-csv-redes", "data", allow_duplicate=True),
