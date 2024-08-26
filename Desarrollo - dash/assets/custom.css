@@ -1,3 +1,9 @@
 .text-blue {
     color: #0064AF;
 }
+
+/* assets/style.css */
+.date-picker-custom {
+    width: 75%; /* Set the desired width */
+    height: 45px; /* You can also set the height if needed */
+}
