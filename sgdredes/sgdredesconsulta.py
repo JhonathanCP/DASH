@@ -274,13 +274,24 @@ def register_callbacks(app):
     @app.callback(
     Output("download-csv-redes", "data"),
     Input("download-button", "n_clicks"),
-    [State('co_red_dropdown', 'value'),
-     State('nu_expediente_input', 'value')],
     prevent_initial_call=True,
 )
-def download_csv(n_clicks, co_red, nu_expediente):
-    data = fetch_data(co_red, nu_expediente)
-    if data is not None and not data.empty:
-        return dcc.send_data_frame(data.to_csv, "resultados.csv", index=False)
-    return None
+    def download_csv(n_clicks):
+        # Asegúrate de que el botón haya sido clicado
+        if n_clicks is None:
+            return None
+
+        # Llamar a la función fetch_data usando los valores que se deben definir en la función layout
+        # Se asume que los valores están disponibles de alguna manera (tal vez almacenados en variables globales o contextos)
+        co_red = "valor_obtenido"
+        nu_expediente = "valor_obtenido"
+
+        data = fetch_data(co_red, nu_expediente)
+
+        # Verificar si se obtuvo algún dato
+        if data is not None and not data.empty:
+            return dcc.send_data_frame(data.to_csv, "resultados.csv", index=False)
+        
+        # En caso de que no haya datos o la función fetch_data devuelva None
+        return None
     
