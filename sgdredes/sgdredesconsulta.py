@@ -192,16 +192,16 @@ def layout(codigo=None):
                     style={"margin-top": "7px", "padding": "0px", "border": "none"}
                 )
             ], width=12, md=6, lg=5),
-            dbc.Col([
-                dbc.Button(
-                    [html.I(className="fas fa-file-excel"), html.Span(" Descargar datos")],
-                    id='download-button',
-                    style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white'},
-                    className='align-middle'
-            ),
-            dcc.Download(id="download-csv-redes")  # Añadimos este componente para la descarga
-        ], width=12, md=12, lg=2, className='mb-2 mt-4 text-center')
-        ], style={'margin': '0'}, className='px-4'),
+             dbc.Col([
+                        dbc.Button(
+                            [html.I(className="fas fa-file-excel"), html.Span(" Descargar datos")],
+                            id='download-button',
+                            style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white'},
+                            className='align-middle'
+                        ),
+                        dcc.Download(id="download-csv-redes")
+                    ], width=12, md=12, lg=2, className='mb-2 mt-4 text-center')
+                ], style={'margin': '0'}, className='px-4'),
 
         # Tarjeta del asunto_redes
         dbc.Row([
@@ -272,16 +272,15 @@ def layout(codigo=None):
 
 def register_callbacks(app):
     @app.callback(
-        Output("download-csv-redes", "data", allow_duplicate=True),
-        Input("download-button", "n_clicks"),
-        [State('co_red_dropdown', 'value'),
-        State('nu_expediente_input', 'value')],
-        prevent_initial_call=True,
-    )
-    def download_csv(co_red,nu_expediente):
-        data = fetch_data(co_red, nu_expediente)
-        if data is not None and not data.empty:
-            return dcc.send_data_frame(data.to_csv, "resultados.csv", index=False)
-        else:
-            return None
+    Output("download-csv-redes", "data"),
+    Input("download-button", "n_clicks"),
+    [State('co_red_dropdown', 'value'),
+     State('nu_expediente_input', 'value')],
+    prevent_initial_call=True,
+)
+def download_csv(n_clicks, co_red, nu_expediente):
+    data = fetch_data(co_red, nu_expediente)
+    if data is not None and not data.empty:
+        return dcc.send_data_frame(data.to_csv, "resultados.csv", index=False)
+    return None
     
