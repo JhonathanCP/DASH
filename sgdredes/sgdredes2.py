@@ -8,6 +8,7 @@ import io
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 import base64
+from urllib.parse import parse_qs
 
 # Configuración de cifrado
 clave = b'ESSALUDSGD2024$$'
@@ -24,11 +25,11 @@ def descifrar_codigo(codigo_cifrado):
         # Desencriptar los datos
         datos_descifrados = unpad(cipher.decrypt(codigo_cifrado_bytes), AES.block_size)
         texto_descifrado = datos_descifrados.decode('utf-8')
-        print("Texto descifrado:", texto_descifrado)
         return texto_descifrado
     except (ValueError, KeyError) as e:
         print("Error al descifrar:", e)
         return None
+
     
 # Función para crear una conexión a la base de datos
 def create_connection():
@@ -40,22 +41,6 @@ def create_connection():
     except Exception as e:
         print(f"Failed to connect to the database: {e}")
         return None
-
-# Función para obtener las opciones del desplegable
-def get_red_options():
-    engine = create_connection()
-    if engine is not None:
-        try:
-            with engine.connect() as conn:
-                query = "SELECT co_red FROM idosgd.si_redes"
-                df = pd.read_sql(query, conn)
-                options = [{'label': row['co_red'], 'value': row['co_red']} for _, row in df.iterrows()]
-                return options
-        except Exception as e:
-            print(f"Failed to fetch red options: {e}")
-            return []
-    else:
-        return []
 
 # Función para obtener los datos según el filtro
 def fetch_data(co_red, nu_expediente):
@@ -131,10 +116,6 @@ def fetch_data(co_red, nu_expediente):
     else:
         return None
 
-# Obtener las opciones para el desplegable
-red_options = get_red_options()
-print(f"Red options: {red_options}")  # Debugging line
-
 # Definir el layout como función
 def layout(codigo=None):
     # Descifra el código y obtiene los valores necesarios
@@ -148,7 +129,7 @@ def layout(codigo=None):
     fecha_envio = first_row['Fecha de envío']
     clase_documento = first_row['Clase de documento']
     asunto_redes = first_row['Asunto']
-    data_dict = last_5_data.to_dict('records')
+    # data_dict = last_5_data.to_dict('records')
 
     return dbc.Container([
         dbc.Container(fluid=True, className="p-0 mx-0", children=[

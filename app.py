@@ -74,13 +74,16 @@ def display_page(pathname, search):
         return administracion_layout
     
     elif pathname == '/sgdredes/seguimiento':
-        from sgdredes.sgdredes import layout as sgd_redes_layout, register_callbacks as register_callbacks_sgdredes
+        from sgdredes.sgdredes2 import layout as sgd_redes_layout, register_callbacks as register_callbacks_sgdredes
         if not hasattr(app, 'sgdredes_callbacks_registered'):
             register_callbacks_sgdredes(app)
             app.sgdredes_callbacks_registered = True
         
         # Pasar el parámetro `codigo` al layout de sgdredes
         codigo = params.get('codigo', [None])[0]  # Obtiene el valor del parámetro 'codigo'
+        # Parsear la cadena de consulta
+        print(codigo)
+
         return sgd_redes_layout(codigo=codigo)  # Pasar el código al layout
 
     elif pathname == '/sgdcentral/seguimiento':
