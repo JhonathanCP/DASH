@@ -134,6 +134,8 @@ def layout(codigo=None):
     fecha_envio = first_row['Fecha de envío']
     clase_documento = first_row['Clase de documento']
     asunto_redes = first_row['Asunto']
+    red=first_row['Red']
+    expediente=first_row['N° Expediente']
     # data_dict = last_5_data.to_dict('records')
 
     return dbc.Container([
@@ -174,6 +176,8 @@ def layout(codigo=None):
             dbc.Col([
                 dbc.Card(
                     dbc.CardBody([
+                        html.P(f"Red: {red}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
+                        html.P(f"Expediente: {expediente}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
                         html.P(f"Razón Social: {razon_social}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
                         html.P(f"Fecha de Envío: {fecha_envio}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
                         html.P(f"Clase de Documento: {clase_documento}", className="card-text", style={'font-size': '14px', 'color': '#606060'})
