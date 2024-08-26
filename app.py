@@ -3,29 +3,13 @@ from dash import html, dcc
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 from flask import Flask, render_template, jsonify, request
+from urllib.parse import parse_qs
+
 #from sgdredes.data_provider import get_data
 
 # Inicializar el servidor Flask y la aplicación Dash
 server = Flask(__name__)
-app = dash.Dash(__name__, suppress_callback_exceptions=True, 
-                # index_string='''
-                # <!DOCTYPE html>
-                # <html>
-                # <head>
-                #     {%metas%}
-                #     {%css%}
-                #     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-                # </head>
-                # <body>
-                #     {%app_entry%}
-                #     <footer>
-                #         {%config%}
-                #         {%scripts%}
-                #         {%renderer%}
-                #     </footer>
-                # </body>
-                # </html>
-                # ''',
+app = dash.Dash(__name__, suppress_callback_exceptions=True,
                 server=server, external_stylesheets=[dbc.themes.BOOTSTRAP,
     'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css',  # Bootstrap CSS
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css']
@@ -45,9 +29,15 @@ app.layout = html.Div([
 ])
 
 # Callback para manejar el contenido basado en la ruta
+# Callback para manejar el contenido basado en la ruta y parámetros
 @app.callback(Output('page-content', 'children'),
-              [Input('url', 'pathname')])
-def display_page(pathname):
+            [Input('url', 'pathname'),
+            Input('url', 'search')])
+
+def display_page(pathname, search):
+    # Parsear los parámetros de la URL
+    params = parse_qs(search[1:])  # Elimina el '?' inicial
+    
     if pathname == '/dengue/detalle':
         from dengue import layout as reporte2_layout, register_callbacks as register_callbacks_reporte2
         if not hasattr(app, 'reporte2_callbacks_registered'):
@@ -88,7 +78,10 @@ def display_page(pathname):
         if not hasattr(app, 'sgdredes_callbacks_registered'):
             register_callbacks_sgdredes(app)
             app.sgdredes_callbacks_registered = True
-        return sgd_redes_layout
+        
+        # Pasar el parámetro `codigo` al layout de sgdredes
+        codigo = params.get('codigo', [None])[0]  # Obtiene el valor del parámetro 'codigo'
+        return sgd_redes_layout(codigo=codigo)  # Pasar el código al layout
 
     elif pathname == '/sgdcentral/seguimiento':
             from sgdcentral.sgdcentral import layout as sgd_central_layout, register_callbacks as register_callbacks_sgdcentral
