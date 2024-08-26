@@ -249,6 +249,16 @@ def layout(codigo=None):
             ], width=12)
         ], style={'margin-top': '20px'}, className='px-4 pt-0'),
 
+        dbc.Row([dbc.Col([
+            dbc.Button(
+                [html.I(className="fas fa-file-excel"), html.Span(" Descargar datos")],
+                id='download-button',
+                style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white'},
+                className='align-middle'
+            ),
+            dcc.Download(id="download-csv-redes")  # Añadimos este componente para la descarga
+        ], width=12, md=12, lg=2, className='mb-2 mt-4 text-center'),]),
+
     ], fluid=True, className='p-0 m-0')
 
 def register_callbacks(app):
