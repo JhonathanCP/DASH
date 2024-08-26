@@ -268,8 +268,8 @@ def layout(codigo=None):
                 ],
             ),
         ], width=12)
-    ], style={'margin-top': '20px', 'width': '100%'}, className='px-4 pt-0'),
-], fluid=True, className='p-0 m-0')
+    ], style={'margin-top': '20px', 'width': '100%'}, className='px-4 pt-0 pb-4'),
+], fluid=True, className='px-0 m-0 pb-4')
 
 
 def register_callbacks(app):
