@@ -122,7 +122,7 @@ def fetch_data(co_red, nu_expediente):
         return None
 
 # Definir el layout como función
-def layout(codigo="dasd"):
+def layout(codigo=None):
     # Descifra el código y obtiene los valores necesarios
     texto_descifrado = descifrar_codigo(codigo)
     co_red = texto_descifrado[:4]
@@ -250,8 +250,6 @@ def layout(codigo="dasd"):
         ], style={'margin-top': '20px'}, className='px-4 pt-0'),
 
     ], fluid=True, className='p-0 m-0')
-
-layout=layout(codigo=None)
 
 def register_callbacks(app):
     @app.callback(

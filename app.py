@@ -36,7 +36,6 @@ app.layout = html.Div([
 
 def display_page(pathname, search):
     # Parsear los parámetros de la URL
-    params = parse_qs(search[1:])  # Elimina el '?' inicial
     
     if pathname == '/dengue/detalle':
         from dengue import layout as reporte2_layout, register_callbacks as register_callbacks_reporte2
@@ -74,17 +73,15 @@ def display_page(pathname, search):
         return administracion_layout
     
     elif pathname == '/sgdredes/seguimiento':
-        from sgdredes.sgdredes2 import layout as sgd_redes_layout, register_callbacks as register_callbacks_sgdredes
+        from sgdredes.test import layout as sgd_redes_layout, register_callbacks as register_callbacks_sgdredes
         if not hasattr(app, 'sgdredes_callbacks_registered'):
             register_callbacks_sgdredes(app)
             app.sgdredes_callbacks_registered = True
-        
-        # Pasar el parámetro `codigo` al layout de sgdredes
-        codigo = params.get('codigo', [None])[0]  # Obtiene el valor del parámetro 'codigo'
-        # Parsear la cadena de consulta
-        print(codigo)
 
-        return sgd_redes_layout(codigo=codigo)  # Pasar el código al layout
+        # Pasar el parámetro `codigo` al layout de sgdredes
+        params = parse_qs(search[1:])
+        codigo = params.get('codigo', [None])[0]  # Obtiene el valor del parámetro 'codigo'
+        return sgd_redes_layout(codigo)  # Pasar el código al layout
 
     elif pathname == '/sgdcentral/seguimiento':
             from sgdcentral.sgdcentral import layout as sgd_central_layout, register_callbacks as register_callbacks_sgdcentral
