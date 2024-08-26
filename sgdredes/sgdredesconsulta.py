@@ -139,6 +139,8 @@ def layout(codigo=None):
     # data_dict = last_5_data.to_dict('records')
 
     return dbc.Container([
+        dcc.Store(id='store-co-red', data=co_red),
+        dcc.Store(id='store-nu-expediente', data=nu_expediente),
         dbc.Container(fluid=True, className="p-0 mx-0", children=[
             dbc.Navbar(
                 dbc.Container(fluid=True, className="d-flex justify-content-between align-items-center p-0", children=[
@@ -272,26 +274,22 @@ def layout(codigo=None):
 
 def register_callbacks(app):
     @app.callback(
-    Output("download-csv-redes", "data"),
-    Input("download-button", "n_clicks"),
-    prevent_initial_call=True,
-)
-    def download_csv(n_clicks):
-        # Asegúrate de que el botón haya sido clicado
+        Output("download-csv-redes", "data"),
+        Input("download-button", "n_clicks"),
+        State('store-co-red', 'data'),
+        State('store-nu-expediente', 'data'),
+        prevent_initial_call=True,
+    )
+    def download_csv(n_clicks, co_red, nu_expediente):
         if n_clicks is None:
             return None
 
-        # Llamar a la función fetch_data usando los valores que se deben definir en la función layout
-        # Se asume que los valores están disponibles de alguna manera (tal vez almacenados en variables globales o contextos)
-        co_red = "valor_obtenido"
-        nu_expediente = "valor_obtenido"
-
+        # Llama a la función fetch_data usando los valores obtenidos del dcc.Store
         data = fetch_data(co_red, nu_expediente)
 
-        # Verificar si se obtuvo algún dato
+        # Verifica si se obtuvo algún dato
         if data is not None and not data.empty:
             return dcc.send_data_frame(data.to_csv, "resultados.csv", index=False)
         
-        # En caso de que no haya datos o la función fetch_data devuelva None
         return None
     
