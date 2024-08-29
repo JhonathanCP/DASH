@@ -129,14 +129,33 @@ def layout(codigo=None):
     co_red = texto_descifrado[:4]
     nu_expediente = texto_descifrado[5:]
     data = fetch_data(co_red, nu_expediente)
-    last_5_data = data.tail(5)
-    first_row = data.iloc[0]
-    razon_social = first_row['Razón Social']
-    fecha_envio = first_row['Fecha de envío']
-    clase_documento = first_row['Clase de documento']
-    asunto_redes = first_row['Asunto']
-    red=first_row['Red']
-    expediente=first_row['N° Expediente']
+
+    if data is not None and not data.empty:
+        last_5_data = data.tail(5)
+        first_row = data.iloc[0]
+        razon_social = first_row['Razón Social']
+        fecha_envio = first_row['Fecha de envío']
+        clase_documento = first_row['Clase de documento']
+        asunto_redes = first_row['Asunto']
+        red = first_row['Red']
+        expediente = first_row['N° Expediente']
+    else:
+        razon_social = "N/A"
+        fecha_envio = "N/A"
+        clase_documento = "N/A"
+        asunto_redes = "Número de expediente no encontrado"
+        red = "N/A"
+        expediente = texto_descifrado[5:]
+        data = pd.DataFrame(columns=[
+            'N° Expediente', 
+            'Clase de documento', 
+            'Asunto', 
+            'Fecha de envío', 
+            'Origen', 
+            'Fecha de aceptación', 
+            'Destino', 
+            'Red'
+        ])
     # data_dict = last_5_data.to_dict('records')
 
     return dbc.Container([
@@ -193,7 +212,7 @@ def layout(codigo=None):
                 style={"margin-top": "7px", "padding": "0px", "border": "none"}
             )
         ], width=12, md=6, lg=5),
-         dbc.Col([
+        dbc.Col([
                     dbc.Button(
                         [html.I(className="fas fa-file-excel"), html.Span(" Descargar datos")],
                         id='download-button',
