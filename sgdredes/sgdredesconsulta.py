@@ -140,11 +140,11 @@ def layout(codigo=None):
         red = first_row['Red']
         expediente = first_row['N° Expediente']
     else:
-        razon_social = "N/A"
-        fecha_envio = "N/A"
-        clase_documento = "N/A"
+        razon_social = ""
+        fecha_envio = ""
+        clase_documento = ""
         asunto_redes = "Número de expediente no encontrado"
-        red = "N/A"
+        red = ""
         expediente = texto_descifrado[5:]
         data = pd.DataFrame(columns=[
             'N° Expediente', 
