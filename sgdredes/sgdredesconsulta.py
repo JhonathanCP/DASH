@@ -212,15 +212,18 @@ def layout(codigo=None):
                 style={"margin-top": "7px", "padding": "0px", "border": "none"}
             )
         ], width=12, md=6, lg=5),
+        # Solo se muestra el botón si hay datos
         dbc.Col([
-                    dbc.Button(
-                        [html.I(className="fas fa-file-excel"), html.Span(" Descargar datos")],
-                        id='download-button',
-                        style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white'},
-                        className='align-middle'
-                    ),
-                    dcc.Download(id="download-csv-redes")
-                ], width=12, md=12, lg=2, className='mb-2 mt-4 text-center')
+            dbc.Card([
+                dbc.Button(
+                    [html.I(className="fas fa-file-excel"), html.Span(" Descargar datos")],
+                    id='download-button',
+                    style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white'},
+                    className='align-middle'
+                ),
+                dcc.Download(id="download-csv-redes")
+            ], style={'display': 'block' if not data.empty else 'none', 'border': 'none', 'background-color': 'transparent'})
+        ], width=12, md=12, lg=2, className='mb-2 mt-4 text-center')
             ], style={'margin': '0', 'width': '100%'}, className='px-4'),
 
     # Tarjeta del asunto_redes
