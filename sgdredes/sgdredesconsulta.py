@@ -48,6 +48,23 @@ def create_connection():
         print(f"Failed to connect to the database: {e}")
         return None
 
+def get_red_options():
+    engine = create_connection()
+    if engine is not None:
+        try:
+            with engine.connect() as conn:
+                query = "SELECT co_red, des_red FROM idosgd.si_redes"
+                df = pd.read_sql(query, conn)
+                options = [{'label': row['des_red'], 'value': row['co_red']} for _, row in df.iterrows()]
+                return options
+        except Exception as e:
+            print(f"Failed to fetch red options: {e}")
+            return []
+    else:
+        return []
+
+red_options = get_red_options()
+
 # Función para obtener los datos según el filtro
 def fetch_data(co_red, nu_expediente):
     engine = create_connection()
@@ -124,13 +141,38 @@ def fetch_data(co_red, nu_expediente):
 
 # Definir el layout como función
 def layout(codigo=None):
-    # Descifra el código y obtiene los valores necesarios
+    # Verifica si el código está vacío o no es desencriptable
     texto_descifrado = descifrar_codigo(codigo)
-    co_red = texto_descifrado[:4]
-    nu_expediente = texto_descifrado[5:]
-    data = fetch_data(co_red, nu_expediente)
-
-    if data is not None and not data.empty:
+    
+    if not texto_descifrado:  # Si no se pudo descifrar, establece valores vacíos
+        co_red = ""
+        nu_expediente = ""
+    else:
+        co_red = texto_descifrado[:4]
+        nu_expediente = texto_descifrado[5:]
+    
+    # Obtener los datos si hay código válido, sino crear un dataframe vacío
+    data = fetch_data(co_red, nu_expediente) if co_red and nu_expediente else pd.DataFrame(columns=[
+        'Razón Social', 
+        'N° Expediente', 
+        'Clase de documento', 
+        'Asunto', 
+        'Fecha de envío', 
+        'Origen', 
+        'Fecha de aceptación', 
+        'Destino', 
+        'Red'
+    ])
+    
+    # Si no hay datos o el código es inválido, establecer valores vacíos
+    if data is None or data.empty:
+        razon_social = ""
+        fecha_envio = ""
+        clase_documento = ""
+        asunto_redes = "Número de expediente no encontrado" if co_red and nu_expediente else ""
+        red = ""
+        expediente = nu_expediente if nu_expediente else ""
+    else:
         last_5_data = data.tail(5)
         first_row = data.iloc[0]
         razon_social = first_row['Razón Social']
@@ -139,24 +181,6 @@ def layout(codigo=None):
         asunto_redes = first_row['Asunto']
         red = first_row['Red']
         expediente = first_row['N° Expediente']
-    else:
-        razon_social = ""
-        fecha_envio = ""
-        clase_documento = ""
-        asunto_redes = "Número de expediente no encontrado"
-        red = ""
-        expediente = texto_descifrado[5:]
-        data = pd.DataFrame(columns=[
-            'N° Expediente', 
-            'Clase de documento', 
-            'Asunto', 
-            'Fecha de envío', 
-            'Origen', 
-            'Fecha de aceptación', 
-            'Destino', 
-            'Red'
-        ])
-    # data_dict = last_5_data.to_dict('records')
 
     return dbc.Container([
     dbc.Container(fluid=True, className="p-0 m-0", children=[
@@ -192,6 +216,38 @@ def layout(codigo=None):
         )
     ]),
     # Tarjetas para los valores de la primera fila
+
+    dbc.Row([
+        dbc.Col([
+            html.H6("Red", style={'font-size': '14px', 'color': '#606060', 'fontWeight': 'normal', 'fontFamily': 'Calibri'}),
+            dcc.Dropdown(
+                id='co_red_dropdown',
+                options=red_options,
+                placeholder='Seleccionar Código de Red',
+                style={'width': '100%', 'fontSize': '14px'}
+            )
+        ], width=12, md=12, lg=5, className='mb-2'),
+
+        dbc.Col([
+            html.H6("# Expediente", style={'font-size': '14px', 'color': '#606060', 'fontWeight': 'normal', 'fontFamily': 'Calibri'}),
+            dcc.Input(
+                id='nu_expediente_input',
+                type='text',
+                placeholder='Número de Expediente',
+                style={'width': '85%', 'fontSize': '14px'},
+                className='mr-2',
+                debounce=True
+            ),
+            dbc.Button(
+                html.I(className="fas fa-search"),
+                id='search-button',
+                style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white'},
+                className='align-middle'
+            )
+        ], width=12, md=12, lg=5, className='mb-2'),
+    ], style={'margin': '0', 'width': '100%'}, className='px-4'),
+
+
     dbc.Row([
         dbc.Col([
             dbc.Card(
@@ -205,9 +261,9 @@ def layout(codigo=None):
         dbc.Col([
             dbc.Card(
                 dbc.CardBody([
-                    html.P(f"Razón Social: {razon_social}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
-                    html.P(f"Fecha de Envío: {fecha_envio}", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
-                    html.P(f"Clase de Documento: {clase_documento}", className="card-text", style={'font-size': '14px', 'color': '#606060'})
+                    html.P(f"Razón Social: {razon_social}", id="razon-social-redes", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
+                    html.P(f"Fecha de Envío: {fecha_envio}", id="min-fecha-redes", className="card-text", style={'font-size': '14px', 'color': '#606060'}),
+                    html.P(f"Clase de Documento: {clase_documento}", id="tipdoc-redes", className="card-text", style={'font-size': '14px', 'color': '#606060'})
                 ]),
                 style={"margin-top": "7px", "padding": "0px", "border": "none"}
             )
@@ -298,15 +354,15 @@ def register_callbacks(app):
     @app.callback(
         Output("download-csv-redes", "data"),
         Input("download-button", "n_clicks"),
-        State('store-co-red', 'data'),
-        State('store-nu-expediente', 'data'),
+        State('co_red_dropdown', 'value'),
+        State('nu_expediente_input', 'value'),
         prevent_initial_call=True,
     )
     def download_csv(n_clicks, co_red, nu_expediente):
         if n_clicks is None:
             return None
 
-        # Llama a la función fetch_data usando los valores obtenidos del dcc.Store
+        # Llama a la función fetch_data usando los valores obtenidos de los inputs
         data = fetch_data(co_red, nu_expediente)
 
         # Verifica si se obtuvo algún dato
@@ -321,3 +377,43 @@ def register_callbacks(app):
             )
         
         return None
+
+
+    # Callback para actualizar la tabla de datos
+    @app.callback(
+        [Output('table', 'data'),
+         Output('razon-social-redes', 'children'),
+         Output('min-fecha-redes', 'children'),
+         Output('tipdoc-redes', 'children'),
+         Output('asunto_redes', 'children')],
+        [Input('search-button', 'n_clicks')],
+        [State('co_red_dropdown', 'value'),
+         State('nu_expediente_input', 'value')],
+        prevent_initial_call=True,
+    )
+    def update_table(n_clicks, co_red, nu_expediente):
+        if not co_red or not nu_expediente:
+            # Si no se proporcionan valores válidos, no realizar la búsqueda
+            return [], "", "", "", ""
+
+        # Llama a la función fetch_data usando los valores obtenidos de los inputs
+        data = fetch_data(co_red, nu_expediente)
+
+        # Si no hay datos, devolver valores por defecto
+        if data is None or data.empty:
+            return [], "", "", "", "Número de expediente no encontrado"
+
+        # Si hay datos, procesarlos para actualizar los componentes
+        first_row = data.iloc[0]
+        razon_social = first_row['Razón Social']
+        fecha_envio = first_row['Fecha de envío']
+        clase_documento = first_row['Clase de documento']
+        asunto_redes = first_row['Asunto']
+        red = first_row['Red']
+        expediente = first_row['N° Expediente']
+
+        return (data.to_dict('records'),
+                razon_social,
+                fecha_envio,
+                clase_documento,
+                asunto_redes)

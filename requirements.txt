@@ -1,14 +1,12 @@
-dash
-plotly
-pandas
-psycopg2-binary
-sqlalchemy
-dash-bootstrap-components
-Flask-Caching
-schedule
-jupyter_dash
-pdfkit
-reportlab
+dash==2.18.1
+plotly==5.24.1
+pandas==2.2.2
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.34
+dash-bootstrap-components==1.6.0
+Flask-Caching==2.3.0
+schedule==1.2.2
+reportlab==4.2.2
 pyodbc == 4.0.34
-pycrypto
-pycryptodome
+pycrypto==2.6.1
+pycryptodome==3.20.0

@@ -47,9 +47,9 @@ def get_red_options():
     if engine is not None:
         try:
             with engine.connect() as conn:
-                query = "SELECT co_red FROM idosgd.si_redes"
+                query = "SELECT co_red, des_red FROM idosgd.si_redes"
                 df = pd.read_sql(query, conn)
-                options = [{'label': row['co_red'], 'value': row['co_red']} for _, row in df.iterrows()]
+                options = [{'label': row['des_red'], 'value': row['co_red']} for _, row in df.iterrows()]
                 return options
         except Exception as e:
             print(f"Failed to fetch red options: {e}")

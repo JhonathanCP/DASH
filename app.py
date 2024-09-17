@@ -14,7 +14,7 @@ app = dash.Dash(__name__, suppress_callback_exceptions=True,
     'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css',  # Bootstrap CSS
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css']
 )
-app.title = "Proyecto Dash"
+app.title = "SGD Redes - Seguimiento trámite"
 
 # Importar la función para crear la ruta de exportación de CSV
 from miconsulta import create_csv_export_route
@@ -37,42 +37,14 @@ app.layout = html.Div([
 def display_page(pathname, search):
     # Parsear los parámetros de la URL
     
-    if pathname == '/dengue/detalle':
-        from dengue import layout as reporte2_layout, register_callbacks as register_callbacks_reporte2
-        if not hasattr(app, 'reporte2_callbacks_registered'):
-            register_callbacks_reporte2(app)
-            app.reporte2_callbacks_registered = True
-        return reporte2_layout
-
-    elif pathname == '/cafae/digitalizacion':
-        from cafae.cafae_digitalizacion import layout as elecciones_layout, register_callbacks as register_callbacks_elecciones
-        if not hasattr(app, 'elecciones_callbacks_registered'):
-            register_callbacks_elecciones(app)
-            app.elecciones_callbacks_registered = True
-        return elecciones_layout
-
-    elif pathname == '/cafae/digitacion':
-        from cafae.cafae_digitacion import layout as digitacion_layout, register_callbacks as register_callbacks_digitacion
-        if not hasattr(app, 'digitacion_callbacks_registered'):
-            register_callbacks_digitacion(app)
-            app.digitacion_callbacks_registered = True
-        return digitacion_layout
-
-    elif pathname == '/cafae/verificacion':
-        from cafae.cafae_verificacion import layout as verificacion_layout, register_callbacks as register_callbacks_verificacion
-        if not hasattr(app, 'verificacion_callbacks_registered'):
-            register_callbacks_verificacion(app)
-            app.verificacion_callbacks_registered = True
-        return verificacion_layout
-
-    elif pathname == '/cafae/administracion':
-        from cafae.cafae_administracion import layout as administracion_layout, register_callbacks as register_callbacks_administracion
-        if not hasattr(app, 'administracion_callbacks_registered'):
-            register_callbacks_administracion(app)
-            app.administracion_callbacks_registered = True
-        return administracion_layout
+    # if pathname == '/dengue/detalle':
+    #     from dengue import layout as reporte2_layout, register_callbacks as register_callbacks_reporte2
+    #     if not hasattr(app, 'reporte2_callbacks_registered'):
+    #         register_callbacks_reporte2(app)
+    #         app.reporte2_callbacks_registered = True
+    #     return reporte2_layout
     
-    elif pathname == '/sgdredes/seguimiento':
+    if pathname == '/':
         from sgdredes.sgdredesconsulta import layout as sgd_redes_layout, register_callbacks as register_callbacks_sgdredes
         if not hasattr(app, 'sgdredes_callbacks_registered'):
             register_callbacks_sgdredes(app)
@@ -82,39 +54,6 @@ def display_page(pathname, search):
         params = parse_qs(search[1:])
         codigo = params.get('codigo', [None])[0]  # Obtiene el valor del parámetro 'codigo'
         return sgd_redes_layout(codigo)  # Pasar el código al layout
-
-    elif pathname == '/sgdcentral/seguimiento':
-            from sgdcentral.sgdcentral import layout as sgd_central_layout, register_callbacks as register_callbacks_sgdcentral
-            if not hasattr(app, 'sgdcentral_callbacks_registered'):
-                register_callbacks_sgdcentral(app)
-                app.sgdcentral_callbacks_registered = True
-            return sgd_central_layout
-    
-    else:
-        return html.Div([
-            html.H1("Bienvenido a la aplicación Dash"),
-            html.P("Selecciona un reporte de las rutas disponibles.")
-        ])
-
-# Ruta para servir el archivo HTML de SGD Red
-# @server.route('/sgdredes')
-# def sgdredes():
-#     return render_template('sgdredes.html')
-
-# # Definir la ruta de la API en el servidor Flask
-# @server.route('/api/data', methods=['GET'])
-# def data():
-#     data = request.get_json()  # Esto obtiene los datos del cuerpo del POST
-#     co_red = data.get('co_red')
-#     nu_expediente = data.get('nu_expediente')
-
-#     # Validar que los parámetros se proporcionen
-#     if not co_red or not nu_expediente:
-#         return jsonify({'error': 'Faltan parámetros: co_red y nu_expediente son necesarios.'}), 400
-
-#     # Utiliza la función get_data() para obtener los datos
-#     data = get_data(co_red, nu_expediente)
-#     return jsonify(data)
 
 # Servidor
 if __name__ == '__main__':
