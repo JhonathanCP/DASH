@@ -364,7 +364,6 @@ def register_callbacks(app):
 
         # Llama a la función fetch_data usando los valores obtenidos de los inputs
         data = fetch_data(co_red, nu_expediente)
-        
 
         # Verifica si se obtuvo algún dato
         if data is not None and not data.empty:
@@ -400,6 +399,7 @@ def register_callbacks(app):
 
         # Llama a la función fetch_data usando los valores obtenidos de los inputs
         data=fetch_data(co_red,nu_expediente)
+
         # Si no hay datos, devolver valores por defecto
         if data is None or data.empty:
             return [], "", "", "", "Número de expediente no encontrado"
