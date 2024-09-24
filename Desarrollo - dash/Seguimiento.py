@@ -51,22 +51,29 @@ def fetch_data(var):
         raise ConnectionError("No se pudo establecer la conexión a la base de datos.")
     try:
         query = f"""
+WITH MaxAudit AS (
+    SELECT 
+        sub_d.hoja_tramite,
+        MAX(sub_md.AUDIT_TRAB_DER) AS Max_Audit_Trab_Der
+    FROM 
+        DB_TRAMITE_DOCUMENTARIO.web_tramite.MOVIMIENTO_DOCUMENTO sub_md
+    LEFT OUTER JOIN 
+        DB_TRAMITE_DOCUMENTARIO.web_tramite.DOCUMENTO sub_d ON sub_md.ID_DOCUMENTO = sub_d.ID_DOCUMENTO
+    GROUP BY 
+        sub_d.hoja_tramite
+)
 SELECT 
     d.hoja_tramite,
     d.tipo_hoja,
     cdi.DESCRIPCION,
     d.INDICATIVO_OFICIO,
     p.RAZON_SOCIAL,
-    d.FECHA_RECEPCION,
     d.ASUNTO,
-    md.AUDIT_REC,
-    do.SIGLAS AS SIGLAS_ORIGEN,
     do.DEPENDENCIA AS DEPENDENCIA_ORIGEN,
     dd.SIGLAS AS SIGLAS_DESTINO,
     dd.DEPENDENCIA AS DEPENDENCIA_DESTINO,
     ht.APELLIDOS_TRABAJADOR,
     ht.NOMBRES_TRABAJADOR,
-    ed.ID_ESTADO_DOCUMENTO,
     ed.DESCRIPCION AS ESTADO_DOCUMENTO,
     md.AUDIT_TRAB_DER AS FECHA_DELEGADO,
     md.derivado,
@@ -77,8 +84,7 @@ SELECT
 
     -- Columna ESTADO
     CASE
-        WHEN ed.ID_ESTADO_DOCUMENTO <> 2 
-          AND ed.ID_ESTADO_DOCUMENTO <> 10 
+        WHEN ed.ID_ESTADO_DOCUMENTO NOT IN (2, 10) 
           AND md.derivado = 0 
           AND md.finalizado = 0 THEN 'Pendiente'
         ELSE 'Otros'
@@ -100,15 +106,10 @@ LEFT OUTER JOIN
     DB_GENERAL.jcardenas.H_DEPENDENCIA dd ON dd.CODIGO_DEPENDENCIA = md.ID_DEPENDENCIA_DESTINO
 LEFT JOIN 
     DB_GENERAL.jcardenas.H_TRABAJADOR ht ON ht.CODIGO_TRABAJADOR = md.codigo_trabajador
+JOIN 
+    MaxAudit ma ON d.hoja_tramite = ma.hoja_tramite AND md.AUDIT_TRAB_DER = ma.Max_Audit_Trab_Der
 WHERE
-    (do.SIGLAS LIKE '{var}' OR dd.SIGLAS LIKE '{var}')
-    AND
-    md.AUDIT_TRAB_DER = (
-        SELECT MAX(sub_md.AUDIT_TRAB_DER)
-        FROM DB_TRAMITE_DOCUMENTARIO.web_tramite.MOVIMIENTO_DOCUMENTO sub_md
-        LEFT OUTER JOIN DB_TRAMITE_DOCUMENTARIO.web_tramite.DOCUMENTO sub_d ON sub_md.ID_DOCUMENTO = sub_d.ID_DOCUMENTO
-        WHERE sub_d.hoja_tramite = d.hoja_tramite
-    )
+    (do.SIGLAS LIKE '{var}' OR dd.SIGLAS LIKE '{var}');
         """
         result = pd.read_sql(query, conn)
         result["Hoja de trámite"]=result["hoja_tramite"]+"-"+result["tipo_hoja"]
@@ -122,6 +123,7 @@ WHERE
         result['tip_hoja'] = result['tipo_hoja'].apply(lambda x: 'Interno' if x == 'I' else ('Externo' if x == 'E' else None))
         result['FECHA_DELEGADO'] = pd.to_datetime(result['FECHA_DELEGADO'])
         result['FECHA_DELEGADO'] = result['FECHA_DELEGADO'].dt.strftime('%Y-%m-%d %H:%M:%S')
+        result = result.sort_values(by='DIFERENCIA_DIAS', ascending=False)
     finally:
         conn.close()  # Cerrar la conexión al final
     return result
@@ -293,10 +295,10 @@ def update_table(hoja_tramite, tipo_doc, razon_social, start_date, end_date):
                         'color': 'white'
                     },
                     style_cell_conditional=[
-                        {'if': {'column_id': 'Hoja de trámite'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '200px', 'textAlign': 'center'},
-                        {'if': {'column_id': 'DESCRIPCION'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '250px', 'textAlign': 'center'},
-                        {'if': {'column_id': 'INDICATIVO_OFICIO'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px', 'textAlign': 'center'},
-                        {'if': {'column_id': 'FECHA_DELEGADO'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px', 'textAlign': 'center'},
+                        {'if': {'column_id': 'Hoja de trámite'}, 'minWidth': '70px', 'width': '70px', 'maxWidth': '80px', 'textAlign': 'center'},
+                        {'if': {'column_id': 'DESCRIPCION'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100  px', 'textAlign': 'center'},
+                        {'if': {'column_id': 'INDICATIVO_OFICIO'}, 'minWidth': '70px', 'width': '70px', 'maxWidth': '70px', 'textAlign': 'center'},
+                        {'if': {'column_id': 'FECHA_DELEGADO'}, 'minWidth': '70px', 'width': '70px', 'maxWidth': '80px', 'textAlign': 'center'},
                         {'if': {'column_id': 'RAZON_SOCIAL'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '100px', 'textAlign': 'center'},
                         {'if': {'column_id': 'ASUNTO'}, 'minWidth': '200px', 'width': '200px', 'maxWidth': '250px', 'textAlign': 'center'},
                         {'if': {'column_id': 'DEPENDENCIA_ORIGEN'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '100px', 'textAlign': 'center'},
