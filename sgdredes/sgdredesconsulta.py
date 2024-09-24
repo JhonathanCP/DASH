@@ -354,7 +354,6 @@ def register_callbacks(app):
     @app.callback(
         Output("download-csv-redes", "data"),
         Input("download-button", "n_clicks"),
-        State('co_red_dropdown', 'value'),
         State('nu_expediente_input', 'value'),
         prevent_initial_call=True,
     )
