@@ -225,6 +225,8 @@ dbc.Row([
                 style={'height': '100px','font-size': '13px' },),
                 
             html.Div(id='output-container')],width=9, md=3, lg=2),
+
+
             dbc.Col([
             html.Label("Estado días", style={'font-size': '16px', 'color': '#0064AF'}),
             dcc.Dropdown(
@@ -359,6 +361,9 @@ def update_table(hoja_tramite, tipo_doc, razon_social,estado_dias,dependencia_or
     )
 
     return table, False, ""
+
+
+
 
 
 if __name__ == '__main__':
