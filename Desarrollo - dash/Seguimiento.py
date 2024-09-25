@@ -20,6 +20,7 @@ import oracledb
 from datetime import datetime
 from dash.exceptions import PreventUpdate
 from concurrent.futures import ThreadPoolExecutor
+import os
 
 # Parámetros de conexión
 server = '10.0.0.133'
@@ -42,8 +43,7 @@ def create_connection():
         print(f"Error al conectar: {e}")
     return conn
 
-# Variable global para almacenar el valor extraído de la URL
-var = "CEABE"
+var="GG"
 
 def fetch_data(var):
     conn = create_connection()
@@ -51,29 +51,22 @@ def fetch_data(var):
         raise ConnectionError("No se pudo establecer la conexión a la base de datos.")
     try:
         query = f"""
-WITH MaxAudit AS (
-    SELECT 
-        sub_d.hoja_tramite,
-        MAX(sub_md.AUDIT_TRAB_DER) AS Max_Audit_Trab_Der
-    FROM 
-        DB_TRAMITE_DOCUMENTARIO.web_tramite.MOVIMIENTO_DOCUMENTO sub_md
-    LEFT OUTER JOIN 
-        DB_TRAMITE_DOCUMENTARIO.web_tramite.DOCUMENTO sub_d ON sub_md.ID_DOCUMENTO = sub_d.ID_DOCUMENTO
-    GROUP BY 
-        sub_d.hoja_tramite
-)
 SELECT 
     d.hoja_tramite,
     d.tipo_hoja,
     cdi.DESCRIPCION,
     d.INDICATIVO_OFICIO,
     p.RAZON_SOCIAL,
+    d.FECHA_RECEPCION,
     d.ASUNTO,
+    md.AUDIT_REC,
+    do.SIGLAS AS SIGLAS_ORIGEN,
     do.DEPENDENCIA AS DEPENDENCIA_ORIGEN,
     dd.SIGLAS AS SIGLAS_DESTINO,
     dd.DEPENDENCIA AS DEPENDENCIA_DESTINO,
     ht.APELLIDOS_TRABAJADOR,
     ht.NOMBRES_TRABAJADOR,
+    ed.ID_ESTADO_DOCUMENTO,
     ed.DESCRIPCION AS ESTADO_DOCUMENTO,
     md.AUDIT_TRAB_DER AS FECHA_DELEGADO,
     md.derivado,
@@ -84,7 +77,8 @@ SELECT
 
     -- Columna ESTADO
     CASE
-        WHEN ed.ID_ESTADO_DOCUMENTO NOT IN (2, 10) 
+        WHEN ed.ID_ESTADO_DOCUMENTO <> 2 
+          AND ed.ID_ESTADO_DOCUMENTO <> 10 
           AND md.derivado = 0 
           AND md.finalizado = 0 THEN 'Pendiente'
         ELSE 'Otros'
@@ -106,10 +100,15 @@ LEFT OUTER JOIN
     DB_GENERAL.jcardenas.H_DEPENDENCIA dd ON dd.CODIGO_DEPENDENCIA = md.ID_DEPENDENCIA_DESTINO
 LEFT JOIN 
     DB_GENERAL.jcardenas.H_TRABAJADOR ht ON ht.CODIGO_TRABAJADOR = md.codigo_trabajador
-JOIN 
-    MaxAudit ma ON d.hoja_tramite = ma.hoja_tramite AND md.AUDIT_TRAB_DER = ma.Max_Audit_Trab_Der
 WHERE
-    (do.SIGLAS LIKE '{var}' OR dd.SIGLAS LIKE '{var}');
+    (do.SIGLAS LIKE '{var}' OR dd.SIGLAS LIKE '{var}')
+    AND
+    md.AUDIT_TRAB_DER = (
+        SELECT MAX(sub_md.AUDIT_TRAB_DER)
+        FROM DB_TRAMITE_DOCUMENTARIO.web_tramite.MOVIMIENTO_DOCUMENTO sub_md
+        LEFT OUTER JOIN DB_TRAMITE_DOCUMENTARIO.web_tramite.DOCUMENTO sub_d ON sub_md.ID_DOCUMENTO = sub_d.ID_DOCUMENTO
+        WHERE sub_d.hoja_tramite = d.hoja_tramite
+    )
         """
         result = pd.read_sql(query, conn)
         result["Hoja de trámite"]=result["hoja_tramite"]+"-"+result["tipo_hoja"]
@@ -123,7 +122,15 @@ WHERE
         result['tip_hoja'] = result['tipo_hoja'].apply(lambda x: 'Interno' if x == 'I' else ('Externo' if x == 'E' else None))
         result['FECHA_DELEGADO'] = pd.to_datetime(result['FECHA_DELEGADO'])
         result['FECHA_DELEGADO'] = result['FECHA_DELEGADO'].dt.strftime('%Y-%m-%d %H:%M:%S')
-        result = result.sort_values(by='DIFERENCIA_DIAS', ascending=False)
+        result['Estado días'] = np.select([result['DIFERENCIA_DIAS'] <= 7, (result['DIFERENCIA_DIAS'] > 7) & (result['DIFERENCIA_DIAS'] <= 15), result['DIFERENCIA_DIAS'] > 15],['🟢 1 a 7 días', '🟡 8 a 15 días', '🔴 Mayor a 15 días'])
+        
+        
+        result[['parte_izquierda2', 'Origen']] = result['SIGLAS_ORIGEN'].str.rsplit('-', n=1, expand=True)
+        result['Origen_vf'] = np.where(
+        result['Origen'].isna(),  # Si 'Destino' está vacío (equivalente a BLANK() en DAX)
+        result['SIGLAS_ORIGEN'] + " - " + result['DEPENDENCIA_ORIGEN'],  # Si está vacío
+        result['Origen'] + " - " + result['DEPENDENCIA_ORIGEN'])  # Si no está vacío
+
     finally:
         conn.close()  # Cerrar la conexión al final
     return result
@@ -132,8 +139,9 @@ data=fetch_data(var)
 
 tipdoc= data["tip_hoja"].unique()
 options_razon_social=data["RAZON_SOCIAL"].dropna().unique()
-options_razon_social
-
+options_estado_dias=data["Estado días"].unique()
+options_dependencia_destino= data["Destino_vf"].unique()
+options_dependencia_origen= data["Origen_vf"].unique()
 
 def get_unique_options():
     connection = create_connection()
@@ -154,6 +162,7 @@ def get_unique_options():
 # Llamada a la función para obtener los valores de la columna 'DEPENDENCIA'
 options = get_unique_options()
 
+
 external_stylesheets = [
     dbc.themes.BOOTSTRAP,
     'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css',  # Bootstrap CSS
@@ -164,10 +173,7 @@ external_stylesheets = [
 app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=external_stylesheets)
 
 app.layout = dbc.Container([
-        html.Div([
-            dcc.Location(id='url', refresh=False),
-            html.Div(id='page-content', style={"margin": "0", "padding": "0"})
-        ]),
+    
     # Título
 dbc.Row([
     # Título y logotipo en la misma fila
@@ -186,7 +192,7 @@ dbc.Row([
         dbc.Col([
             html.Label("Hoja de trámite", style={'font-size': '16px', 'color': '#0064AF'}),
             dcc.Input(id='HT',style={'font-size': '12px', 'height': '40px'}),
-                ], width=9, md=3, lg=1),
+                ], width=9, md=3, lg=1, className='mr-4'),
 
         dbc.Col([
             html.Label("Tipo de documento", style={'font-size': '16px', 'color': '#0064AF'}),
@@ -199,7 +205,7 @@ dbc.Row([
         ),],width=9, md=3, lg=2),
 
         dbc.Col([
-            html.Label("Razón social", style={'font-size': '16px', 'color': '#0064AF'}),
+            html.Label("Razón social", style={'font-size': '16px', 'color': '#0064AF', 'margin-bottom':'10px'}),
             dcc.Dropdown(
                 id='razsoc',
                 options=options_razon_social,
@@ -219,11 +225,42 @@ dbc.Row([
                 style={'height': '100px','font-size': '13px' },),
                 
             html.Div(id='output-container')],width=9, md=3, lg=2),
-            dbc.Col(
-            
+            dbc.Col([
+            html.Label("Estado días", style={'font-size': '16px', 'color': '#0064AF'}),
+            dcc.Dropdown(
+                id='estdias',
+                options=options_estado_dias,
+                placeholder="Seleccione",
+                optionHeight=60,
+                style={'height': '41px', 'width': '80%', 'font-size': '16px'}
+        ),],width=9, md=3, lg=2
+
         ),
 
-    ], className="mb-4"),
+    ], style={"height": "90px",'margin-top': '5px'}),
+
+    dbc.Row([
+            dbc.Col([
+            html.Label("Dependencia destino", style={'font-size': '16px', 'color': '#0064AF'}),
+            dcc.Dropdown(
+                id='depdest',
+                options=options_dependencia_destino,
+                placeholder="Seleccione tipo",
+                optionHeight=50,
+                style={'height': '41px', 'width': '100%'}
+        ),],width=9, md=3, lg=4),
+
+            dbc.Col([
+            html.Label("Dependencia origen", style={'font-size': '16px', 'color': '#0064AF'}),
+            dcc.Dropdown(
+                id='depori',
+                options=options_dependencia_origen,
+                placeholder="Seleccione tipo",
+                optionHeight=50,
+                style={'height': '41px', 'width': '100%'}
+        ),],width=9, md=3, lg=4),
+
+    ], style={"height": "90px",'margin-bottom': '5px'}),
 
         # Salida de datos con dbc.Spinner
         dbc.Spinner(
@@ -247,10 +284,13 @@ dbc.Row([
     Input('HT', 'value'),
     Input('tipdoc', 'value'),
     Input('razsoc', 'value'),
+    Input('estdias', 'value'),
+    Input('depori', 'value'),
+    Input('depdest', 'value'),
     Input('date-picker-range', 'start_date'),
     Input('date-picker-range', 'end_date')
 )
-def update_table(hoja_tramite, tipo_doc, razon_social, start_date, end_date):
+def update_table(hoja_tramite, tipo_doc, razon_social,estado_dias,dependencia_ori,dependencia_dest,start_date, end_date):
     # Copiamos el DataFrame original
     df_filtered = data
 
@@ -262,7 +302,13 @@ def update_table(hoja_tramite, tipo_doc, razon_social, start_date, end_date):
     
     if razon_social:
         df_filtered = df_filtered[df_filtered['RAZON_SOCIAL'] == razon_social]
-    
+    if estado_dias:
+        df_filtered = df_filtered[df_filtered['Estado días'] == estado_dias]
+    if dependencia_ori:
+        df_filtered = df_filtered[df_filtered['Origen_vf'] == dependencia_ori]
+    if dependencia_dest:
+        df_filtered = df_filtered[df_filtered['Destino_vf'] == dependencia_dest]
+
     if start_date and end_date:
         df_filtered = df_filtered[
             (df_filtered['FECHA_DELEGADO'] >= start_date) & 
@@ -277,7 +323,7 @@ def update_table(hoja_tramite, tipo_doc, razon_social, start_date, end_date):
     # Crea la tabla con el DataFrame filtrado
     table = dash_table.DataTable(
       id='data-table',
-                    columns=[{"name": i, "id": i} for i in ["Hoja de trámite","DESCRIPCION","INDICATIVO_OFICIO","FECHA_DELEGADO","RAZON_SOCIAL","ASUNTO","DEPENDENCIA_ORIGEN","Destino_vf","Trabajador","DIFERENCIA_DIAS"]],
+                    columns=[{"name": i, "id": i} for i in ["Hoja de trámite","DESCRIPCION","INDICATIVO_OFICIO","FECHA_DELEGADO","RAZON_SOCIAL","ASUNTO","DEPENDENCIA_ORIGEN","Destino_vf","Trabajador","DIFERENCIA_DIAS", "Estado días"]],
                     data=df_filtered.to_dict('records'),
                     style_table={'overflowX': 'auto', 'width': '100%',},
                     page_size=10,
@@ -297,34 +343,23 @@ def update_table(hoja_tramite, tipo_doc, razon_social, start_date, end_date):
                         'color': 'white'
                     },
                     style_cell_conditional=[
-                        {'if': {'column_id': 'Hoja de trámite'}, 'minWidth': '70px', 'width': '70px', 'maxWidth': '80px', 'textAlign': 'center'},
-                        {'if': {'column_id': 'DESCRIPCION'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100  px', 'textAlign': 'center'},
-                        {'if': {'column_id': 'INDICATIVO_OFICIO'}, 'minWidth': '70px', 'width': '70px', 'maxWidth': '70px', 'textAlign': 'center'},
-                        {'if': {'column_id': 'FECHA_DELEGADO'}, 'minWidth': '70px', 'width': '70px', 'maxWidth': '80px', 'textAlign': 'center'},
+                        {'if': {'column_id': 'Hoja de trámite'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '200px', 'textAlign': 'center'},
+                        {'if': {'column_id': 'DESCRIPCION'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '250px', 'textAlign': 'center'},
+                        {'if': {'column_id': 'INDICATIVO_OFICIO'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px', 'textAlign': 'center'},
+                        {'if': {'column_id': 'FECHA_DELEGADO'}, 'minWidth': '80px', 'width': '80px', 'maxWidth': '100px', 'textAlign': 'center'},
                         {'if': {'column_id': 'RAZON_SOCIAL'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '100px', 'textAlign': 'center'},
                         {'if': {'column_id': 'ASUNTO'}, 'minWidth': '200px', 'width': '200px', 'maxWidth': '250px', 'textAlign': 'center'},
                         {'if': {'column_id': 'DEPENDENCIA_ORIGEN'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '100px', 'textAlign': 'center'},
                         {'if': {'column_id': 'Destino_vf'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '100px', 'textAlign': 'center'},
                         {'if': {'column_id': 'Trabajador'}, 'minWidth': '100px', 'width': '100px', 'maxWidth': '100px', 'textAlign': 'center'},
                         {'if': {'column_id': 'DIFERENCIA_DIAS'}, 'minWidth': '60px', 'width': '60px', 'maxWidth': '65px', 'textAlign': 'center'},
+                        {'if': {'column_id': 'Estado días'}, 'minWidth': '60px', 'width': '60px', 'maxWidth': '65px', 'textAlign': 'center'}
                     ],
                     style_data_conditional=[{'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(244, 250, 253)'}],
     )
 
     return table, False, ""
 
-# Callback para extraer el parámetro de la URL
-@app.callback(
-    Output('output-param', 'children'),
-    [Input('url', 'pathname')]
-)
-def extract_param_from_url(pathname):
-    if pathname:
-        # Extraer el parámetro después del "/"
-        param = pathname.split('/')[-1]
-        return f"El parámetro extraído de la URL es: {param}"
-    return "No se encontró parámetro en la URL"
-
 
 if __name__ == '__main__':
-        app.run_server(debug=True)
+    app.run_server(debug=True)
