@@ -42,8 +42,8 @@ def create_connection():
         print(f"Error al conectar: {e}")
     return conn
 
-
-var="GG"
+# Variable global para almacenar el valor extraído de la URL
+var = "CEABE"
 
 def fetch_data(var):
     conn = create_connection()
@@ -164,8 +164,10 @@ external_stylesheets = [
 app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=external_stylesheets)
 
 app.layout = dbc.Container([
-    dcc.Location(id='url', refresh=False),
-    html.Div(id='page-content', style={"margin": "0", "padding": "0"}),
+        html.Div([
+            dcc.Location(id='url', refresh=False),
+            html.Div(id='page-content', style={"margin": "0", "padding": "0"})
+        ]),
     # Título
 dbc.Row([
     # Título y logotipo en la misma fila
@@ -311,18 +313,17 @@ def update_table(hoja_tramite, tipo_doc, razon_social, start_date, end_date):
 
     return table, False, ""
 
-# Callback para extraer la variable de la URL
+# Callback para extraer el parámetro de la URL
 @app.callback(
-    Output('output', 'children'),
-    Input('url', 'pathname'),
-    Input('url', 'search')  # Obtenemos la ruta de la URL
+    Output('output-param', 'children'),
+    [Input('url', 'pathname')]
 )
-def display_value(pathname):
-    # Verificamos si la URL contiene algo después de la raíz
-    if pathname and pathname != '/':
-        var = pathname[1:]  # Extraemos el valor (omitimos la barra inicial)
-        return f"El valor de var es: {var}"
-    return "No se ha proporcionado ninguna variable en la URL."
+def extract_param_from_url(pathname):
+    if pathname:
+        # Extraer el parámetro después del "/"
+        param = pathname.split('/')[-1]
+        return f"El parámetro extraído de la URL es: {param}"
+    return "No se encontró parámetro en la URL"
 
 
 if __name__ == '__main__':
