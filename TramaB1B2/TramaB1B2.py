@@ -122,8 +122,8 @@ SELECT CT.CITAMBORICENASICOD AS ORIGEN,
     ON CB2.GRPETAEDADCOD = X2.ACTMEDEDADATEN
   LEFT OUTER JOIN CMSHO10 SR2
     ON SR2.SERVHOSCOD = X2.ACTMEDSERVHOSCOD
- WHERE CT.CITAMBPROCONFEC BETWEEN TO_DATE('01/08/2024', 'DD/MM/YYYY') AND
-       TO_DATE('31/08/2024', 'DD/MM/YYYY')
+ WHERE CT.CITAMBPROCONFEC BETWEEN TO_DATE('01/09/2024', 'DD/MM/YYYY') AND
+       TO_DATE('30/09/2024', 'DD/MM/YYYY')
    AND CT.CITAMBSERVHOSCOD IN ('E11', 'E12', 'E19')
    AND CT.ESTCITCOD = '4'
    AND Y2.PERSECNUM IS NOT NULL
@@ -509,7 +509,7 @@ dbc.Row([
     dbc.Col([
         html.Div(style={'height': '1px'}),
         html.H1("SUSALUD - TABLAS AGREGADAS B1 Y B2", style={'color': '#0064AF', 'fontSize': '28px', 'textAlign': 'Left', 'font-weight': 'bold', 'fontFamily': 'Calibri'}),
-        html.H2("Fuente: ESSI. V.1.0.0. Fecha de actualización 01/09/2024", style={'color': '#0064AF', 'fontSize': '12px'}),
+        html.H2("Fuente: ESSI. V.1.0.0. Fecha de actualización 01/10/2024", style={'color': '#0064AF', 'fontSize': '12px'}),
     ], width=10, className="mb-2"),   # Ajusta el ancho según sea necesario
     dbc.Col([
         html.Img(src="/assets/Logotipo sin Slogan_Horizontal_Color Transparente.png", alt="Essalud", width="160"),
