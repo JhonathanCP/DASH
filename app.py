@@ -90,15 +90,15 @@ def display_page(pathname, search):
                 app.sgdcentral_callbacks_registered = True
             return sgd_central_layout
     
-    elif pathname == '/':
-            from sgdredes.sgdredesconsulta import layout as sgd_redes_layout, register_callbacks as register_callbacks_sgdredes
-            if not hasattr(app, 'sgdredes_callbacks_registered'):
-                register_callbacks_sgdredes(app)
-                app.sgdredes_callbacks_registered = True
-            # Pasar el parámetro `codigo` al layout de sgdredes
-            params = parse_qs(search[1:])
-            codigo = params.get('codigo', [None])[0]  # Obtiene el valor del parámetro 'codigo'
-            return sgd_redes_layout(codigo)  # Pasar el código al layout
+    # elif pathname == '/':
+    #         from sgdredes.sgdredesconsulta import layout as sgd_redes_layout, register_callbacks as register_callbacks_sgdredes
+    #         if not hasattr(app, 'sgdredes_callbacks_registered'):
+    #             register_callbacks_sgdredes(app)
+    #             app.sgdredes_callbacks_registered = True
+    #         # Pasar el parámetro `codigo` al layout de sgdredes
+    #         params = parse_qs(search[1:])
+    #         codigo = params.get('codigo', [None])[0]  # Obtiene el valor del parámetro 'codigo'
+    #         return sgd_redes_layout(codigo)  # Pasar el código al layout
     
     else:
         return html.Div([
