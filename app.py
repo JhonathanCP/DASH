@@ -22,6 +22,13 @@ from miconsulta import create_csv_export_route
 # Registrar la ruta de exportación de CSV
 create_csv_export_route(server)
 
+# Registrar los layouts y callbacks de tramas al inicio de la aplicación
+from TramaB1B2.TramaB1B2 import layout as Tramas_layout, register_callbacks as register_callbacks_tramas
+
+# Pre-cargar el layout y registrar los callbacks
+register_callbacks_tramas(app)
+app.tramas_callbacks_registered = True  # Marcar que los callbacks ya fueron registrados
+
 # Establecer el layout principal de la aplicación
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -89,6 +96,19 @@ def display_page(pathname, search):
                 register_callbacks_sgdcentral(app)
                 app.sgdcentral_callbacks_registered = True
             return sgd_central_layout
+    
+
+    elif pathname == '/reportes/turnos':
+            from Turnos_asistenciales.Turnos_asistenciales import layout as turnos_layout, register_callbacks as register_callbacks_turnos
+            if not hasattr(app, 'turnos_callbacks_registered'):
+                register_callbacks_turnos(app)
+                app.turnos_callbacks_registered = True
+            return turnos_layout
+
+    elif pathname == '/reportes/tramas':
+            return Tramas_layout
+
+
     
     # elif pathname == '/':
     #         from sgdredes.sgdredesconsulta import layout as sgd_redes_layout, register_callbacks as register_callbacks_sgdredes
