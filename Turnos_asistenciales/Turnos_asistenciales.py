@@ -1278,10 +1278,11 @@ dbc.Row([
         # Date Picker for Start Date
         dbc.Col(
     [
+        html.Label("Centro asistencial", style={'font-size': '16px', 'color': '#0064AF'}),
         dcc.Dropdown(
             id='cas-turnos',
             options=options,
-            placeholder='Seleccione un centro asistencial',
+            placeholder='Seleccione una opción',
             className='px-0 mx-0',
             optionHeight=53,
             style={'height': '45px', 'width': '100%'}
@@ -1294,10 +1295,11 @@ dbc.Row([
 
         dbc.Col(
             [
+                html.Label("Fecha inicio", style={'font-size': '16px', 'color': '#0064AF'}),
                 dcc.DatePickerSingle(
                     id='Fecha inicio',
+                    placeholder=' ',
                     display_format='DD/MM/YYYY',
-                    placeholder='Fecha inicio',
                     style={'fontSize':'16px'}
                 )
             ],
@@ -1307,9 +1309,10 @@ dbc.Row([
         # Date Picker for End Date
         dbc.Col(
             [
+                html.Label("Fecha Fin", style={'font-size': '16px', 'color': '#0064AF'}),
                 dcc.DatePickerSingle(
                     id='Fecha fin',
-                    placeholder='Fecha fin',
+                    placeholder=' ',
                     display_format='DD/MM/YYYY',
                     className='date-picker-custom px-0 mx-0',
                 )
@@ -1319,12 +1322,13 @@ dbc.Row([
         ),
         dbc.Col(
             [
+                html.Label("DNI", style={'font-size': '16px', 'color': '#0064AF'}),
                 dcc.Input(
                     id='DNI',
                     type='text',
                     inputMode='numeric',  # Permite solo números en dispositivos móviles
                     pattern='[0-9]*',     # Expresión regular para aceptar solo dígitos
-                    placeholder='DNI',
+                    placeholder=' ',
                     className='px-0 mx-0',
                     style={'height': '45px', 'width': '100%'}
                 ),
@@ -1338,7 +1342,8 @@ dbc.Row([
                 id='submit-val1',
                 style={'background-color': '#0064AF', 'border-color': '#0064AF', 'color': 'white', 'width': '58%', 'height': '45px', 'fontSize': '20px'},
             ),
-            className='mb-2',
+            className='d-flex align-items-center',
+            style={'margin-top': '20px'},
             width=3, md=1, lg=1
         ),
         dbc.Col(
@@ -1358,6 +1363,7 @@ dbc.Row([
                 ]),
                 style={'margin-right': '105px'}
             ),
+            style={'margin-top': '30px'},
             width=9, md=2, lg=2
         ),
     ], className="mb-4"),
