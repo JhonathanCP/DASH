@@ -1298,7 +1298,7 @@ dbc.Row([
                     id='Fecha inicio',
                     display_format='DD/MM/YYYY',
                     placeholder='Fecha inicio',
-                    className='date-picker-custom px-0 mx-0'
+                    style={'fontSize':'16px'}
                 )
             ],
             className='px-0 ml-2',
