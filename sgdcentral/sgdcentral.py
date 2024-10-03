@@ -8,15 +8,15 @@ import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 from dash import dash_table
 import numpy as np
-from jupyter_dash import JupyterDash
-import pdfkit
-import base64
-from io import BytesIO
+# from jupyter_dash import JupyterDash
+# import pdfkit
+# import base64
+# from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import pyodbc
 from urllib.parse import quote_plus
-import io
+# import io
 
 # Parámetros de conexión
 server = '10.0.0.133'

@@ -98,12 +98,12 @@ def display_page(pathname, search):
             return sgd_central_layout
     
 
-    elif pathname == '/reportes/turnos':
-            from Turnos_asistenciales.Turnos_asistenciales import layout as turnos_layout, register_callbacks as register_callbacks_turnos
-            if not hasattr(app, 'turnos_callbacks_registered'):
-                register_callbacks_turnos(app)
-                app.turnos_callbacks_registered = True
-            return turnos_layout
+    # elif pathname == '/reportes/turnos':
+    #         from Turnos_asistenciales.Turnos_asistenciales import layout as turnos_layout, register_callbacks as register_callbacks_turnos
+    #         if not hasattr(app, 'turnos_callbacks_registered'):
+    #             register_callbacks_turnos(app)
+    #             app.turnos_callbacks_registered = True
+    #         return turnos_layout
 
     # elif pathname == '/reportes/tramas':
     #         return Tramas_layout
